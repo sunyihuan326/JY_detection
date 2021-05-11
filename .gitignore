@@ -127,3 +127,23 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# jpg xml data
+
+*.jpg
+*.xml
+*.txt
+
+kx_detection/data
+zg_detection/data
+
+kx_detection/checkpoint
+kx_detection/model
+kx_detection/save
+kx_detection/pb_model
+kx_detection/pre_feature
+
+zg_detection/checkpoint
+zg_detection/model
+zg_detection/save
+zg_detection/pb_model
