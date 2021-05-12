@@ -136,6 +136,7 @@ dmypy.json
 *.jpeg
 *.mp4
 *.png
+*.xls
 
 kx_detection/data
 zg_detection/data
