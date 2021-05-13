@@ -8,11 +8,11 @@ import shutil
 import numpy as np
 from tensorflow.python.framework import graph_util
 import tensorflow as tf
-import detection.core.utils as utils
+import zg_detection.core.utils as utils
 from tqdm import tqdm
-from detection.core.dataset import Dataset
-from detection.core.yolov3 import YOLOV3
-from detection.core.config import cfg
+from zg_detection.core.dataset import Dataset
+from zg_detection.core.yolov3 import YOLOV3
+from zg_detection.core.config import cfg
 
 
 class YoloTrain(object):

@@ -30,6 +30,6 @@ def cut_data(txt_file, save_file):
         file.write(i)
 
 
-txt_file = "E:/DataSets/X_3660_data/test39.txt"
-save_file = "test39.txt"
+txt_file = "E:/cv/YOLOs/tensorflow-yolov4-tflite-master/data/dataset/test42.txt"
+save_file = "E:/cv/YOLOs/tensorflow-yolov4-tflite-master/data/dataset/test42.txt"
 cut_data(txt_file, save_file)

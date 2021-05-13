@@ -13,7 +13,7 @@ cfg = __C
 __C.YOLO = edict()
 
 # Set the class name
-__C.YOLO.CLASSES          = "E:/project/zg_detection/detection/data/classes/txzg-food38.names"
+__C.YOLO.CLASSES          = "E:/JY_detection/zg_detection/data/classes/txzg-food38.names"
 __C.YOLO.ANCHORS          = "./data/anchors/basline_anchors.txt"
 __C.YOLO.MOVING_AVE_DECAY = 0.9995
 __C.YOLO.STRIDES          = [8, 16, 32]
@@ -26,21 +26,21 @@ __C.YOLO.DEMO_WEIGHT      = "./checkpoint/yolov3_train_loss=2.7829.ckpt-50"
 # Train options
 __C.TRAIN = edict()
 
-__C.TRAIN.ANNOT_PATH          = "E:/project/zg_detection/detection/data/dataset/food38_train.txt"
+__C.TRAIN.ANNOT_PATH          = "E:/JY_detection/zg_detection/data/dataset/food38_train.txt"
 __C.TRAIN.BATCH_SIZE          = 2
 __C.TRAIN.INPUT_SIZE          = 416
 __C.TRAIN.DATA_AUG            = True
 __C.TRAIN.LEARN_RATE_INIT     = 1e-4
 __C.TRAIN.LEARN_RATE_END      = 1e-6
 __C.TRAIN.WARMUP_EPOCHS       = 2
-__C.TRAIN.FISRT_STAGE_EPOCHS  = 10
-__C.TRAIN.SECOND_STAGE_EPOCHS = 30
-__C.TRAIN.INITIAL_WEIGHT      = ""
+__C.TRAIN.FISRT_STAGE_EPOCHS  = 50
+__C.TRAIN.SECOND_STAGE_EPOCHS = 20
+__C.TRAIN.INITIAL_WEIGHT      = "./checkpoint/yolov3_test_loss=3.0106.ckpt-50"
 
 # TEST options
 __C.TEST = edict()
 
-__C.TEST.ANNOT_PATH            = "E:/project/zg_detection/detection/data/dataset/food38_test.txt"
+__C.TEST.ANNOT_PATH            = "E:/JY_detection/zg_detection/data/dataset/food38_test.txt"
 __C.TEST.BATCH_SIZE            = 2
 __C.TEST.INPUT_SIZE            = 416
 __C.TEST.DATA_AUG              = False

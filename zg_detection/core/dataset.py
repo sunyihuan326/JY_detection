@@ -7,8 +7,8 @@ import cv2
 import random
 import numpy as np
 import tensorflow as tf
-import detection.core.utils as utils
-from detection.core.config import cfg
+import zg_detection.core.utils as utils
+from zg_detection.core.config import cfg
 
 
 class Dataset(object):
@@ -25,7 +25,7 @@ class Dataset(object):
         self.num_classes = len(self.classes)
         self.anchors = np.array(utils.get_anchors(cfg.YOLO.ANCHORS))
         self.anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE
-        self.max_bbox_per_scale = 150
+        self.max_bbox_per_scale = 80
 
         self.annotations = self.load_annotations(dataset_type)
         self.num_samples = len(self.annotations)

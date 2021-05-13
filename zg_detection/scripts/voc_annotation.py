@@ -4,7 +4,7 @@ import argparse
 import xml.etree.ElementTree as ET
 import random
 from tqdm import tqdm
-from detection.core.config import cfg
+from zg_detection.core.config import cfg
 
 def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=True):
     def read_class_names(class_file_name):
@@ -56,11 +56,11 @@ def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=T
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path",
-                        default="F:/model_data/ZG/serve_data/20210120")
+                        default="F:/model_data/ZG/serve_data/202104")
     parser.add_argument("--train_annotation",
-                        default="F:/model_data/ZG/serve_data/20210120/train38.txt")
+                        default="F:/model_data/ZG/serve_data/202104/train38.txt")
     parser.add_argument("--test_annotation",
-                        default="F:/model_data/ZG/serve_data/20210120/test38.txt")
+                        default="F:/model_data/ZG/serve_data/202104/test38.txt")
     # parser.add_argument("--val_annotation",
     #                     default="E:/DataSets/2020_two_phase_KXData/only2phase_data/val18.txt")
     flags = parser.parse_args()

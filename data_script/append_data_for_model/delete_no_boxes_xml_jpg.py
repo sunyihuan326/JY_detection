@@ -36,7 +36,7 @@ def delete_xml_jpg(jpg_dir, xml_dir, cut_save_dir):
                 shutil.move(file_path, xml_cut_save_dir + "/" + file)
                 if os.path.exists(jpg_dir + "/" + file.split(".")[0] + ".jpg"):
                     shutil.move(jpg_dir + "/" + file.split(".")[0] + ".jpg",
-                                jpg_cut_save_dir + "/" + + file.split(".")[0] + ".jpg")
+                                jpg_cut_save_dir + "/" + file.split(".")[0] + ".jpg")
             # try:
             #
             # except:
@@ -44,9 +44,9 @@ def delete_xml_jpg(jpg_dir, xml_dir, cut_save_dir):
 
 
 if __name__ == "__main__":
-    xml_root = "F:/serve_data/202101-03formodel/exrtact_file/Annotations"
-    img_root = "F:/serve_data/202101-03formodel/exrtact_file/JPGImages"
-    cut_save_dir = "F:/serve_data/202101-03formodel/exrtact_file/cut"
+    xml_root = "F:/serve_data/ZG_data/20210129/biaozhu_20210428/Annotations"
+    img_root = "F:/serve_data/ZG_data/20210129/biaozhu_20210428/JPGImages"
+    cut_save_dir = "F:/serve_data/ZG_data/20210129/biaozhu_20210428/cut"
     if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
 
     cls_list = os.listdir(img_root)

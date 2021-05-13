@@ -1,0 +1,14 @@
+!!!!!!已完成数据标注，且数据格式为：    JPGImages   
+                                                  aaa
+                                                     xxx.jpg
+                                                  bbb
+                                                     yyy.jpg
+                                      Annotations  
+                                                  aaa
+                                                      xxx.xml
+                                                  bbb
+                                                      yyy.xml
+**具体步骤如下，**
+step1：delete_no_boxes_xml_jpg.py去除没有任何标签的数据
+step2：delete_jpg_from_xml.py删除不存在标签的jpg文件或者原图不存在的xml文件
+step3：生成可用数据格式（按train test比例分）                                         

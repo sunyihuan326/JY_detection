@@ -6,6 +6,7 @@ created on 2020-06-10
 '''
 
 import xlrd
+import cv2
 
 
 def read_data(excel_filename):
@@ -30,7 +31,6 @@ def read_data(excel_filename):
         ymax_list.append(all_data.cell_value(i + 1, 4))
         layer_list.append(all_data.cell_value(i + 1, 6))
     return 1000, layer_list, xmin_list, ymin_list, xmax_list, ymax_list,
-
 
 def judge_size(layer, xmin, ymin, xmax, ymax):
     '''

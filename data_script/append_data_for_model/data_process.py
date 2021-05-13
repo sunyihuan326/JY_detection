@@ -30,13 +30,18 @@ class process(object):
     数据处理，生成标准格式
     '''
 
-    def __init__(self, data_root):
+    def __init__(self, data_root, typ):
+        '''
+
+        :param data_root: 数据根目录，定位到JPGImages前一个目录
+        :param typ: zg为炸锅，kx为烤箱
+        '''
         self.data_root = data_root
         self.image_root = self.data_root + '/JPGImages'
         self.xml_root = self.data_root + "/Annotations"
         self.txt_root = self.data_root + '/ImageSets/Main'
-
-        self.layer_root = self.data_root + "/layer_data"
+        if typ == "kx":
+            self.layer_root = self.data_root + "/layer_data"
 
     def split_data(self, classes, test_percent, val_percent):
         '''
@@ -202,14 +207,14 @@ class process(object):
 
 
 if __name__ == "__main__":
-    data_root = "F:/serve_data/for_model/202101_03"
-    dprocess = process(data_root)
+    data_root = "F:/model_data/ZG/serve_data/202104"
+    dprocess = process(data_root, "zg")
 
-    classes =os.listdir(data_root+"/JPGImages")
+    classes = os.listdir(data_root + "/JPGImages")
     val_percent = 0
-    test_percent = 0.1
+    test_percent = 0.2
     dprocess.split_data(classes, test_percent, val_percent)
     dprocess.train_all_txt(["train", "test", "val"])
     dprocess.copy2dir(classes, "xml")
     dprocess.copy2dir(classes, "jpg")
-    dprocess.copy_layer2split_dir(classes)
+    # dprocess.copy_layer2split_dir(classes)# 炸锅无烤层数据，仅用于烤箱
