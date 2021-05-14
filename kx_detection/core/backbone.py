@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # coding=utf-8
 
-import multi_detection.core.common as common
+import kx_detection.core.common as common
 import tensorflow as tf
 
 

@@ -6,7 +6,7 @@ import random
 import colorsys
 import numpy as np
 import tensorflow as tf
-from multi_detection.core.config import cfg
+from kx_detection.core.config import cfg
 
 def read_class_names(class_file_name):
     '''loads class name from a file'''

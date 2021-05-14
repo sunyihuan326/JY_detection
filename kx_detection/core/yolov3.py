@@ -5,18 +5,18 @@
 
 import numpy as np
 import tensorflow as tf
-import multi_detection.core.utils as utils
-import multi_detection.core.common as common
-import multi_detection.core.backbone as backbone
-from multi_detection.core.config import cfg
+import kx_detection.core.utils as utils
+import kx_detection.core.common as common
+import kx_detection.core.backbone as backbone
+from kx_detection.core.config import cfg
 
 
 class YOLOV3(object):
     """Implement tensoflow yolov3 here"""
 
-    def __init__(self, input_data, trainable):
+    def __init__(self, input_data,):
 
-        self.trainable = trainable
+        self.trainable = False
         self.classes = utils.read_class_names(cfg.YOLO.CLASSES)
         self.num_class = len(self.classes)
         self.strides = np.array(cfg.YOLO.STRIDES)

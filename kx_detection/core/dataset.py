@@ -8,8 +8,8 @@ import random
 import numpy as np
 import tensorflow as tf
 from PIL import Image, ImageEnhance, ImageFilter
-import multi_detection.core.utils as utils
-from multi_detection.core.config import cfg
+import kx_detection.core.utils as utils
+from kx_detection.core.config import cfg
 
 
 class Dataset(object):

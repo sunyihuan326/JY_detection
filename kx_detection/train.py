@@ -11,11 +11,11 @@ import shutil
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.framework import graph_util
-import multi_detection.core.utils as utils
+import kx_detection.core.utils as utils
 from tqdm import tqdm
-from multi_detection.core.dataset import Dataset
-from multi_detection.core.yolov3 import YOLOV3
-from multi_detection.core.config import cfg
+from kx_detection.core.dataset import Dataset
+from kx_detection.core.yolov3 import YOLOV3
+from kx_detection.core.config import cfg
 
 import os
 
@@ -50,7 +50,7 @@ class YoloTrain(object):
             self.input_data = tf.placeholder(dtype=tf.float32,
                                              shape=(None, self.train_input_size, self.train_input_size, 3),
                                              name='input_data')
-            print("self.input_data",self.input_data)
+            print("self.input_data", self.input_data)
             self.layer_label = tf.compat.v1.placeholder(dtype=tf.float32, name='layer_label')
             self.label_sbbox = tf.compat.v1.placeholder(dtype=tf.float32, name='label_sbbox')
             self.label_mbbox = tf.compat.v1.placeholder(dtype=tf.float32, name='label_mbbox')
@@ -59,10 +59,10 @@ class YoloTrain(object):
             self.true_mbboxes = tf.compat.v1.placeholder(dtype=tf.float32, name='mbboxes')
             self.true_lbboxes = tf.compat.v1.placeholder(dtype=tf.float32, name='lbboxes')
             self.trainable = tf.compat.v1.placeholder(dtype=tf.bool, name='training')
-            print("self.trainable",self.trainable)
+            print("self.trainable", self.trainable)
 
         with tf.name_scope("define_loss"):
-            self.model = YOLOV3(self.input_data, self.trainable)
+            self.model = YOLOV3(self.input_data)
             self.net_var = tf.global_variables()
             self.giou_loss, self.conf_loss, self.prob_loss, giou, bbox_loss_scale = self.model.compute_loss(
                 self.label_sbbox, self.label_mbbox, self.label_lbbox,
@@ -93,7 +93,8 @@ class YoloTrain(object):
         # self._optimizer = tf.train.AdamOptimizer(self.learn_rate).minimize(self.loss, global_step=self.global_step)
 
         with tf.name_scope("define_weight_decay"):
-            moving_ave = tf.train.ExponentialMovingAverage(self.moving_ave_decay).apply(tf.compat.v1.trainable_variables())
+            moving_ave = tf.train.ExponentialMovingAverage(self.moving_ave_decay).apply(
+                tf.compat.v1.trainable_variables())
 
         with tf.name_scope("define_first_stage_train"):
             self.first_stage_trainable_var_list = []
@@ -104,7 +105,7 @@ class YoloTrain(object):
                     self.first_stage_trainable_var_list.append(var)
 
             first_stage_optimizer = tf.compat.v1.train.AdamOptimizer(self.learn_rate).minimize(self.loss,
-                                                                                     var_list=self.first_stage_trainable_var_list)
+                                                                                               var_list=self.first_stage_trainable_var_list)
             with tf.control_dependencies(tf.compat.v1.get_collection(tf.GraphKeys.UPDATE_OPS)):
                 with tf.control_dependencies([first_stage_optimizer, global_step_update]):
                     with tf.control_dependencies([moving_ave]):
@@ -203,12 +204,20 @@ class YoloTrain(object):
             constant_graph = graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, output)
             with tf.io.gfile.GFile('model/yolo_model.pb', mode='wb') as f:
                 f.write(constant_graph.SerializeToString())
-
             # 保存为pb用于tf_serving
-            # export_dir = "E:/Joyoung_WLS_github/tf_yolov3/pb"
-            # tf.saved_model.simple_save(self.sess, export_dir, inputs={"input": self.input_data},
-            #                            outputs={"pred_sbbox": self.pred_sbbox, "pred_mbbox": self.pred_mbbox,
-            #                                     "pre_lbbox": self.pred_lbbox})
+            export_dir = "pb_model"
+            # tf.saved_model.save(self.sess, export_dir, inputs={"input": self.input_data},
+            #                            outputs={"pred_sbbox": self.model.pred_sbbox,
+            #                                     "pred_mbbox": self.model.pred_mbbox,
+            #                                     "pre_lbbox": self.model.pred_lbbox,
+            #                                     "layer_classes": self.model.predict_op})
+
+            # 保存tflite
+            converter = tf.lite.TFLiteConverter(self.sess, [self.input_data],
+                                                [self.model.pred_sbbox, self.model.pred_mbbox, self.model.pred_lbbox,
+                                                 self.model.predict_op])
+            tflite_model = converter.convert()
+            open("converted_model.tflite", "wb").write(tflite_model)
 
             par_test = tqdm(self.testset)
             for test_data in par_test:

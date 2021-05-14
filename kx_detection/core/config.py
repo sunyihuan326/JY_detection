@@ -10,7 +10,7 @@ __C.YOLO = edict()
 
 # Set the class name
 __C.YOLO.LAYER_NUMS                  = 4
-__C.YOLO.CLASSES                     = "E:/kx_detection/multi_detection/data/classes/food42.names"
+__C.YOLO.CLASSES                     = "E:/JY_detection/kx_detection/data/classes/food42.names"
 __C.YOLO.ANCHORS                     = "./data/anchors/basline_anchors.txt"
 __C.YOLO.MOVING_AVE_DECAY            = 0.9995
 __C.YOLO.STRIDES                     = [8, 16, 32]
@@ -23,7 +23,7 @@ __C.YOLO.DEMO_WEIGHT                 = "./yolo3_coco/yolov3_coco.ckpt"
 # Train options
 __C.TRAIN = edict()
 
-__C.TRAIN.ANNOT_PATH                 = "E:/DataSets/model_data/train42.txt"
+__C.TRAIN.ANNOT_PATH                 = "./data/dataset/train42.txt"
 __C.TRAIN.BATCH_SIZE                 = 4
 __C.TRAIN.INPUT_SIZE                 = 320
 __C.TRAIN.DATA_AUG                   = True
@@ -38,7 +38,7 @@ __C.TRAIN.INITIAL_WEIGHT             = "./checkpoint/yolov3_train_loss=11.2574.c
 # TEST options
 __C.TEST = edict()
 
-__C.TEST.ANNOT_PATH                  ="E:/DataSets/model_data/test42.txt"
+__C.TEST.ANNOT_PATH                  ="./data/dataset/test42.txt"
 __C.TEST.BATCH_SIZE                  = 2
 __C.TEST.INPUT_SIZE                  = 320
 __C.TEST.DATA_AUG                    = False

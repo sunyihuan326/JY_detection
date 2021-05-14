@@ -10,9 +10,9 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-import multi_detection.core.utils as utils
-from multi_detection.food_correct_utils import correct_bboxes, get_potatoml
-from multi_detection.core.utils import postprocess_boxes_conf as postprocess_box
+import kx_detection.core.utils as utils
+from kx_detection.food_correct_utils import correct_bboxes, get_potatoml
+from kx_detection.core.utils import postprocess_box
 
 
 class YoloPredict(object):
