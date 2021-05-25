@@ -8,6 +8,7 @@
 @Author  : sunyihuan
 """
 
+
 def change_txt(txt_path, src_txtpath, file_path, typ):
     '''
     更改txt文件中的图片地址
@@ -31,8 +32,16 @@ def change_txt(txt_path, src_txtpath, file_path, typ):
         # print(img_path_name.split("JPGImages")[1])
         txt_file_name = file_path
         if typ == "serve":
-            txt_file_name += img_path_name.split("JPGImages")[1]
-            train_all_list.append(txt_file_name)  # 读取一个插入一个
+            if "JPGImages_aug" in img_path_name:
+                txt_file_name += "JPGImages_aug"
+                txt_file_name += img_path_name.split("JPGImages_aug")[1]
+                train_all_list.append(txt_file_name)  # 读取一个插入一个
+            elif "JPGImages" in img_path_name:
+                txt_file_name += "JPGImages"
+                txt_file_name += img_path_name.split("JPGImages")[1]
+                train_all_list.append(txt_file_name)  # 读取一个插入一个
+            else:
+                print(img_path_name)
         else:  # .jpg前的字段需要更改
             jpg_name = str(img_path_name.split("JPGImages")[1]).split(".jpg")[0] + "_{}.jpg".format(typ) + \
                        str(img_path_name.split("JPGImages")[1]).split(".jpg")[1]
@@ -71,9 +80,9 @@ def replace_txt_path(txt_path, src_txtpath, file_path, target_path):
 
 
 if __name__ == "__main__":
-    txt_path = "/zg_detection/data/dataset/food38_test.txt"
-    new_txt_name = "E:/JY_detection/zg_detection/data/dataset/serve_food38_test.txt"
-    file_path = "/home/sunyihuan/sunyihuan_algorithm/data/zg_data/led_data/JPGImages"
+    txt_path = "F:/model_data/ZG/serve_data/202104/train38.txt"
+    new_txt_name = "F:/model_data/ZG/serve_data/202104/serve_train38.txt"
+    file_path = "/home/sunyihuan/sunyihuan_algorithm/data/zg_data/led_data/"
 
     change_txt(txt_path, new_txt_name, file_path, "serve")
     # target_path = "/home/sunyihuan/sunyihuan_algorithm/data/zg_data/led_data/JPGImages"

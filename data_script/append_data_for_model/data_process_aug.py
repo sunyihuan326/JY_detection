@@ -43,9 +43,9 @@ class aug_mist(object):
                     img1 = cv2.imread(self.img_path)  # 目标图片
                     img2 = cv2.imread('C:/Users/sunyihuan/Desktop/material/{}.jpg'.format(typ))  # 增强融合图片
                     img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]))  # 统一图片大小
-                    dst = cv2.addWeighted(img1, 0.8, img2, 0.3, 0)  # 图片融合
+                    dst = cv2.addWeighted(img1, 0.8, img2, 0.15, 0)  # 图片融合
                     blank = np.zeros(img1.shape, img1.dtype)
-                    dst = cv2.addWeighted(dst, 0.8, blank, 0.1, 0)  # 图片融合
+                    dst = cv2.addWeighted(dst, 0.8, blank, 0.15, 0)  # 图片融合
 
                     # 图片增强
                     cv2.imwrite(self.img_save_path, dst)
@@ -89,6 +89,8 @@ class generate_txt(object):
                 txt_file_name += img_path_name.split("JPGImages")[1]
                 train_all_list.append(txt_file_name)  # 读取一个插入一个
             else:  # .jpg前的字段需要更改
+                print(img_path_name.split("JPGImages"))
+                txt_file_name = txt_file_name.split("JPGImages")[0] + "JPGImages_aug"
                 jpg_name = str(img_path_name.split("JPGImages")[1]).split(".jpg")[0] + "_{}.jpg".format(typ) + \
                            str(img_path_name.split("JPGImages")[1]).split(".jpg")[1]
                 txt_file_name += jpg_name
@@ -135,33 +137,39 @@ class append_txt(object):
 
 
 if __name__ == "__main__":
-    root_dir = "F:/serve_data/for_model/202101_03"
+    root_dir = "F:/model_data/ZG/Li/vocleddata-food38-20210118/train"
     img_dir = "{}/JPGImages".format(root_dir)
-    img_save_dir = "{}/JPGImages".format(root_dir)
-    original_txt = "{}/train42.txt".format(root_dir)
+    img_save_dir = "{}/JPGImages_aug".format(root_dir)
+    original_txt = "{}/food38_train.txt".format("F:/model_data/ZG/Li/vocleddata-food38-20210118")
     if not os.path.exists(img_save_dir): os.mkdir(img_save_dir)
     aug = aug_mist(img_dir, img_save_dir)  # 图片增强处理
 
     g_t = generate_txt()
     # 生成对应的增强txt文件
-    for typ in ["lv", "zi", "hot", "huang"]:
-        aug.img_mist(typ)  # 图片增强处理
-        file_path = "F:/serve_data/for_model/202101_03/JPGImages"
-        save_txt_path = "F:/serve_data/for_model/202101_03/train42_{}.txt".format(typ)
+    # for typ in ["lv", "zi", "hot", "huang"]:
+    for typ in ["hot", "huang"]:
+        # aug.img_mist(typ)  # 图片增强处理
+        file_path = "F:/model_data/ZG/Li/vocleddata-food38-20210118/train/JPGImages"
+        save_txt_path = "F:/model_data/ZG/Li/vocleddata-food38-20210118/train42_{}.txt".format(typ)
         g_t.change_txt_jpgname(original_txt, save_txt_path, file_path, typ)  # 生成增强单独txt文件
     # 合并原图txt和增强txt，且增强数据仅取部分
+    # txt_list = [
+    #     "{}/train42.txt".format(root_dir),
+    #     "{}/train42_lv.txt".format(root_dir),
+    #     "{}/train42_zi.txt".format(root_dir),
+    #     "{}/train42_hot.txt".format(root_dir),
+    #     "{}/train42_huang.txt".format(root_dir),
+    # ]
     txt_list = [
-        "{}/train42.txt".format(root_dir),
-        "{}/train42_lv.txt".format(root_dir),
-        "{}/train42_zi.txt".format(root_dir),
-        "{}/train42_hot.txt".format(root_dir),
-        "{}/train42_huang.txt".format(root_dir),
+        original_txt,
+        "{}/train42_hot.txt".format("F:/model_data/ZG/Li/vocleddata-food38-20210118"),
+        "{}/train42_huang.txt".format("F:/model_data/ZG/Li/vocleddata-food38-20210118"),
     ]
     a_t = append_txt(txt_list)
-    a_t.append_txt2all("{}/train42_huang_hot_lv_zi.txt".format(root_dir), 2)
+    a_t.append_txt2all("{}/train42_huang_hot.txt".format("F:/model_data/ZG/Li/vocleddata-food38-20210118"), 3)
 
-    # 生成serve端数据
-    serve_file_path = "/home/sunyihuan/sunyihuan_algorithm/data/KX_data/3660_202008/bu/serve_data/202101_03/JPGImages"
-    save_serve_txt_path = "{}/serve_3660train42_huang_hot_lv_zi.txt".format(root_dir)
-    g_t.change_txt_jpgname("{}/train42_huang_hot_lv_zi.txt".format(root_dir), save_serve_txt_path, serve_file_path,
-                           "serve")
+    # # 生成serve端数据
+    # serve_file_path =  "/home/sunyihuan/sunyihuan_algorithm/data/zg_data/led_data/JPGImages_aug"
+    # save_serve_txt_path = "{}/serve_3660train42_huang_hot_lv_zi.txt".format(root_dir)
+    # g_t.change_txt_jpgname("{}/train42_huang_hot_lv_zi.txt".format(root_dir), save_serve_txt_path, serve_file_path,
+    #                        "serve")

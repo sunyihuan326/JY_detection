@@ -13,6 +13,7 @@
 
 import os
 import shutil
+from tqdm import tqdm
 
 
 def copy_val2jpg_dir(txt_root, layer_dir, all_jpg_dir, save_dir, typ):
@@ -24,44 +25,54 @@ def copy_val2jpg_dir(txt_root, layer_dir, all_jpg_dir, save_dir, typ):
     :param save_dir: 要保存图片地址
     :return:
     '''
+    if layer_dir != "":
+        for txt in tqdm(os.listdir(txt_root)):
+            if "_{}".format(typ) in txt:
+                save_name = save_dir + "/" + txt.split("_test")[0]
+                layer_data = "{}/{}".format(layer_dir, txt.split("_test")[0])
+                val_b_list = os.listdir(layer_data + "/bottom")
+                val_m_list = os.listdir(layer_data + "/middle")
+                val_t_list = os.listdir(layer_data + "/top")
+                val_o_list = os.listdir(layer_data + "/others")
+                os.mkdir(save_name)
+                save_b_name = save_name + "/bottom"
+                save_m_name = save_name + "/middle"
+                save_t_name = save_name + "/top"
+                save_o_name = save_name + "/others"
+                os.mkdir(save_b_name), os.mkdir(save_m_name), os.mkdir(save_t_name), os.mkdir(save_o_name)  # 创建烤层对应文件夹
 
-    for txt in os.listdir(txt_root):
-        if "_{}".format(typ) in txt:
-            save_name = save_dir + "/" + txt.split("_test")[0]
-            layer_data = "{}/{}".format(layer_dir, txt.split("_test")[0])
-            val_b_list = os.listdir(layer_data + "/bottom")
-            val_m_list = os.listdir(layer_data + "/middle")
-            val_t_list = os.listdir(layer_data + "/top")
-            val_o_list = os.listdir(layer_data + "/others")
-            os.mkdir(save_name)
-            save_b_name = save_name + "/bottom"
-            save_m_name = save_name + "/middle"
-            save_t_name = save_name + "/top"
-            save_o_name = save_name + "/others"
-            os.mkdir(save_b_name), os.mkdir(save_m_name), os.mkdir(save_t_name), os.mkdir(save_o_name)  # 创建烤层对应文件夹
-
-            val_jpg_names = open(txt_root + "/" + txt).readlines()
-            for jpg_name in val_jpg_names:
-                jpg_name = jpg_name.strip("\n")
-                jpg_name = jpg_name + ".jpg"
-                if jpg_name in val_b_list:
-                    shutil.copy(all_jpg_dir + "/" + jpg_name, save_b_name + "/" + jpg_name)
-                elif jpg_name in val_m_list:
-                    shutil.copy(all_jpg_dir + "/" + jpg_name, save_m_name + "/" + jpg_name)
-                elif jpg_name in val_t_list:
-                    shutil.copy(all_jpg_dir + "/" + jpg_name, save_t_name + "/" + jpg_name)
-                elif jpg_name in val_o_list:
-                    shutil.copy(all_jpg_dir + "/" + jpg_name, save_o_name + "/" + jpg_name)
-                else:
-                    print(jpg_name)
+                val_jpg_names = open(txt_root + "/" + txt).readlines()
+                for jpg_name in val_jpg_names:
+                    jpg_name = jpg_name.strip("\n")
+                    jpg_name = jpg_name + ".jpg"
+                    if jpg_name in val_b_list:
+                        shutil.copy(all_jpg_dir + "/" + jpg_name, save_b_name + "/" + jpg_name)
+                    elif jpg_name in val_m_list:
+                        shutil.copy(all_jpg_dir + "/" + jpg_name, save_m_name + "/" + jpg_name)
+                    elif jpg_name in val_t_list:
+                        shutil.copy(all_jpg_dir + "/" + jpg_name, save_t_name + "/" + jpg_name)
+                    elif jpg_name in val_o_list:
+                        shutil.copy(all_jpg_dir + "/" + jpg_name, save_o_name + "/" + jpg_name)
+                    else:
+                        print(jpg_name)
+    else:
+        for txt in tqdm(os.listdir(txt_root)):
+            if "_{}".format(typ) in txt:
+                save_name = save_dir + "/" + txt.split("_{}".format(typ))[0]
+                if not os.path.exists(save_name): os.mkdir(save_name)
+                val_jpg_names = open(txt_root + "/" + txt).readlines()
+                for jpg_name in val_jpg_names:
+                    jpg_name = jpg_name.strip("\n")
+                    jpg_name = jpg_name + ".jpg"
+                    shutil.copy(all_jpg_dir + "/" + jpg_name, save_name + "/" + jpg_name)
 
 
 typ = "test"
-txt_root = "F:/serve_data/for_model/202101_03/ImageSets/Main"
-all_jpg_dir = "F:/serve_data/for_model/202101_03/JPGImages"
-save_dir = "F:/serve_data/for_model/202101_03/JPGImages_{}".format(typ)
+txt_root = "F:/model_data/ZG/serve_data/202104/ImageSets/Main"
+all_jpg_dir = "F:/model_data/ZG/serve_data/202104/JPGImages"
+save_dir = "F:/model_data/ZG/serve_data/202104/JPGImages_{}".format(typ)
 if os.path.exists(save_dir): shutil.rmtree(save_dir)
 os.mkdir(save_dir)
-layer_dir = "F:/serve_data/for_model/202101_03/layer_data"
+layer_dir = ""
 
 copy_val2jpg_dir(txt_root, layer_dir, all_jpg_dir, save_dir, typ)

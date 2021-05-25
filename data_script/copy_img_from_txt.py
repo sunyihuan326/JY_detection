@@ -76,7 +76,7 @@ def from_txt_copy_data2all(txt_path, save_dir, jpg_typ, layer_tpy=False):
             na = str(jpg_name.split(".jpg")[0]) + ".xml"
             xml_path = img_name.split("JPGImages")[0] + "Annotations/" + na
             cls = int(file.strip().split(" ")[-1][-1])
-            if "_hot.jpg" not in file and "_zi.jpg" not in file and "_lv.jpg"  not in file and "_huang.jpg" not in file:
+            if "_hot.jpg" not in file and "_zi.jpg" not in file and "_lv.jpg" not in file and "_huang.jpg" not in file:
                 # shutil.copy(xml_path, save_dir + "/" + na)
                 try:
                     shutil.copy(xml_path, save_dir + "/" + na)
@@ -89,12 +89,32 @@ def from_txt_copy_data2all(txt_path, save_dir, jpg_typ, layer_tpy=False):
             #         print(na)
 
 
-if __name__ == "__main__":
-    txt_path =  "E:/DataSets/X_3660_data/test39.txt"
-    save_dir = "E:/DataSets/X_3660_data/all_data/JPGImages_test"
-    if not os.path.exists(save_dir): os.mkdir(save_dir)
-    from_txt_copy_data2all(txt_path, save_dir, "jpg", True)
+def from_model_txt_copy_jpg(txt_path, jpg_save_dir):
+    '''
+    从训练使用txt文件中，拷贝对应的图片至jpg_save_dir中
+    :param txt_path:
+    :param jpg_save_dir:
+    :return:
+    '''
+    txt_file = open(txt_path, "r")
+    txt_files = txt_file.readlines()
 
-    save_dir_anno = "E:/DataSets/X_3660_data/all_data/Annotations_test"
-    if not os.path.exists(save_dir_anno): os.mkdir(save_dir_anno)
-    from_txt_copy_data2all(txt_path, save_dir_anno, "xml", False)
+    for f in tqdm(txt_files):
+        f = f.strip()
+        img_path = f.split(" ")[0]
+        if "aug" in img_path:  # 拷贝图片条件
+            shutil.copy(img_path, jpg_save_dir + img_path.split("/")[-1])
+
+
+if __name__ == "__main__":
+    txt_path = "F:/model_data/ZG/Li/vocleddata-food38-20210118/food38_train_huang_hot.txt"
+    save_dir = "F:/model_data/ZG/Li/vocleddata-food38-20210118/train_aug_for_model/"
+    if not os.path.exists(save_dir):os.mkdir(save_dir)
+    # if not os.path.exists(save_dir): os.mkdir(save_dir)
+    # from_txt_copy_data2all(txt_path, save_dir, "jpg", True)
+    #
+    # save_dir_anno = "E:/DataSets/X_3660_data/all_data/Annotations_test"
+    # if not os.path.exists(save_dir_anno): os.mkdir(save_dir_anno)
+    # from_txt_copy_data2all(txt_path, save_dir_anno, "xml", False)
+
+    from_model_txt_copy_jpg(txt_path, save_dir)

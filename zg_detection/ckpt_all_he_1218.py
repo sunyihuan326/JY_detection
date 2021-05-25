@@ -19,14 +19,14 @@ ckpt文件预测某一文件夹下各类所有图片烤层结果、食材结果
 import cv2
 import numpy as np
 import tensorflow as tf
-import detection.core.utils as utils
+import zg_detection.core.utils as utils
 import os
 import shutil
 from tqdm import tqdm
 import xlwt
 import time
 from sklearn.metrics import confusion_matrix
-from detection.food_correct_utils import correct_bboxes
+from zg_detection.food_correct_utils import correct_bboxes
 
 # gpu限制
 gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.8)

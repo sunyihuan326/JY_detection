@@ -11,7 +11,7 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-from detection.core import utils
+from zg_detection.core import utils
 import os
 import shutil
 from tqdm import tqdm
@@ -101,11 +101,6 @@ class YoloTest(object):
         image = cv2.imread(image_path)  # 图片读取
         bboxes_pr = self.predict(image)  # 预测结果
         #
-        # if self.write_image:
-        #     image = utils.draw_bbox(image, bboxes_pr, show_label=self.show_label)
-        #     drawed_img_save_to_path = str(image_path).split("/")[-1]
-        #     drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[0] + "_" + ".jpg"  # 图片保存地址
-        #     cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)  # 保存图片
 
         # 预测结果,bboxes_pr输出格式为[x_min, y_min, x_max, y_max, probability, cls_id]
 

@@ -23,7 +23,7 @@ def print_nums(img_dirs):
 if __name__ == "__main__":
     w = xlwt.Workbook()
     sheet0 = w.add_sheet("all_nums")
-    dir_root = "F:/serve_data/ZG_data/20210129/biaozhu_20210428/exrtact_file/JPGImages"
+    dir_root = "F:/Test_set/ZG/testset_results/food_error_multi_0514score45"
     all_nums = print_nums(dir_root)
     sheet0.write(0, 0, "classes")
     sheet0.write(0, 1, "nums")
