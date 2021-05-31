@@ -52,7 +52,8 @@ def correct_bboxes(bboxes_pr):
         sumProb = 0.
         # 多个食材，同一标签
         if same_label:
-            new_bboxes_pr[0][4] = 0.98
+            if new_num_label > 3:
+                new_bboxes_pr[0][4] = 0.98
             return new_bboxes_pr
 
         # 多个食材，非同一标签
@@ -100,14 +101,13 @@ def correct_bboxes(bboxes_pr):
                     if name1 == new_bboxes_pr[i][5]:
                         name1_bboxes_pr.append(new_bboxes_pr[i])
 
-                name1_bboxes_pr[0][4] = 0.95
+                # name1_bboxes_pr[0][4] = 0.95
                 return name1_bboxes_pr
-            else:
-                return new_bboxes_pr
+            # else:
+            #     return new_bboxes_pr
 
             # 按各个label的probability降序排序
-            # else:
-            #     new_bboxes_pr = sorted(new_bboxes_pr, key=lambda x: x[4], reverse=True)
-            #     for i in range(len(new_bboxes_pr)):
-            #         new_bboxes_pr[i][4] = new_bboxes_pr[i][4] *1
-            #     return new_bboxes_pr
+            else:
+                for i in range(len(new_bboxes_pr)):
+                    new_bboxes_pr[i][4] = new_bboxes_pr[i][4] * 0.9
+                return new_bboxes_pr
