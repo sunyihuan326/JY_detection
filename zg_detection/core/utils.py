@@ -1,22 +1,47 @@
 #! /usr/bin/env python
 # coding=utf-8
-#================================================================
-#   Copyright (C) 2019 * Ltd. All rights reserved.
-#
-#   Editor      : VIM
-#   File name   : utils.py
-#   Author      : YunYang1994
-#   Created date: 2019-02-28 13:14:19
-#   Description :
-#
-#================================================================
-
 import cv2
 import random
 import colorsys
 import numpy as np
 import tensorflow as tf
 from zg_detection.core.config import cfg
+from PIL import Image, ImageStat, ImageEnhance
+
+
+def get_bright(img):
+    '''
+    获取该区域亮度
+    :param img:
+    :param crop_size:
+    :return:
+    '''
+    crop_size = [160, 310, 900, 745]
+    img = img.crop(crop_size)
+    img = img.convert("YCbCr")
+    start = ImageStat.Stat(img)
+    # print(start.mean[0])
+    return start.mean[0]
+
+
+def adjust_bri(img):
+    '''
+    根据亮度值调整
+    :param img_path:
+    :return:
+    '''
+    b = get_bright(img)
+    if b > 120:  # 针对亮度值b，过大调整
+        g = round(120 / b, 2)
+        enh_bri = ImageEnhance.Brightness(img)
+        img = enh_bri.enhance(g)
+        # img = exposure.adjust_gamma(np.array(img), g)
+    # elif b < 50:
+    #     g = round(50 / b, 2)
+    #     enh_bri = ImageEnhance.Brightness(img)
+    #     img = enh_bri.enhance(g)
+    return img
+
 
 def read_class_names(class_file_name):
     '''loads class name from a file'''
@@ -36,19 +61,22 @@ def get_anchors(anchors_path):
 
 
 def image_preporcess(image, target_size, gt_boxes=None):
+    # 加入亮度判断、调整
+    image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    image = adjust_bri(image)
+    image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+    ih, iw = target_size
+    h, w, _ = image.shape
 
-    ih, iw    = target_size
-    h,  w, _  = image.shape
-
-    scale = min(iw/w, ih/h)
-    nw, nh  = int(scale * w), int(scale * h)
+    scale = min(iw / w, ih / h)
+    nw, nh = int(scale * w), int(scale * h)
     image_resized = cv2.resize(image, (nw, nh))
 
     image_paded = np.full(shape=[ih, iw, 3], fill_value=128.0)
-    dw, dh = (iw - nw) // 2, (ih-nh) // 2
-    image_paded[dh:nh+dh, dw:nw+dw, :] = image_resized
+    dw, dh = (iw - nw) // 2, (ih - nh) // 2
+    image_paded[dh:nh + dh, dw:nw + dw, :] = image_resized
     image_paded = image_paded / 255.
 
     if gt_boxes is None:
@@ -87,38 +115,34 @@ def draw_bbox(image, bboxes, classes=read_class_names(cfg.YOLO.CLASSES), show_la
 
         if show_label:
             bbox_mess = '%s: %.2f' % (classes[class_ind], score)
-            t_size = cv2.getTextSize(bbox_mess, 0, fontScale, thickness=bbox_thick//2)[0]
+            t_size = cv2.getTextSize(bbox_mess, 0, fontScale, thickness=bbox_thick // 2)[0]
             cv2.rectangle(image, c1, (c1[0] + t_size[0], c1[1] - t_size[1] - 3), bbox_color, -1)  # filled
 
-            cv2.putText(image, bbox_mess, (c1[0], c1[1]-2), cv2.FONT_HERSHEY_SIMPLEX,
-                        fontScale, (0, 0, 0), bbox_thick//2, lineType=cv2.LINE_AA)
+            cv2.putText(image, bbox_mess, (c1[0], c1[1] - 2), cv2.FONT_HERSHEY_SIMPLEX,
+                        fontScale, (0, 0, 0), bbox_thick // 2, lineType=cv2.LINE_AA)
 
     return image
 
 
-
 def bboxes_iou(boxes1, boxes2):
-
     boxes1 = np.array(boxes1)
     boxes2 = np.array(boxes2)
 
     boxes1_area = (boxes1[..., 2] - boxes1[..., 0]) * (boxes1[..., 3] - boxes1[..., 1])
     boxes2_area = (boxes2[..., 2] - boxes2[..., 0]) * (boxes2[..., 3] - boxes2[..., 1])
 
-    left_up       = np.maximum(boxes1[..., :2], boxes2[..., :2])
-    right_down    = np.minimum(boxes1[..., 2:], boxes2[..., 2:])
+    left_up = np.maximum(boxes1[..., :2], boxes2[..., :2])
+    right_down = np.minimum(boxes1[..., 2:], boxes2[..., 2:])
 
     inter_section = np.maximum(right_down - left_up, 0.0)
-    inter_area    = inter_section[..., 0] * inter_section[..., 1]
-    union_area    = boxes1_area + boxes2_area - inter_area
-    ious          = np.maximum(1.0 * inter_area / union_area, np.finfo(np.float32).eps)
+    inter_area = inter_section[..., 0] * inter_section[..., 1]
+    union_area = boxes1_area + boxes2_area - inter_area
+    ious = np.maximum(1.0 * inter_area / union_area, np.finfo(np.float32).eps)
 
     return ious
 
 
-
 def read_pb_return_tensors(graph, pb_file, return_elements):
-
     with tf.gfile.FastGFile(pb_file, 'rb') as f:
         frozen_graph_def = tf.GraphDef()
         frozen_graph_def.ParseFromString(f.read())
@@ -167,8 +191,7 @@ def nms(bboxes, iou_threshold, sigma=0.3, method='nms'):
 
 
 def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
-
-    valid_scale=[0, np.inf]
+    valid_scale = [0, np.inf]
     pred_bbox = np.array(pred_bbox)
 
     pred_xywh = pred_bbox[:, 0:4]

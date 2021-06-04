@@ -11,7 +11,8 @@ pb文件预测输出结果
 import cv2
 import numpy as np
 import tensorflow as tf
-import detection.core.utils as utils
+import zg_detection.core.utils as utils
+import os
 
 
 class YoloPredic(object):
@@ -22,9 +23,9 @@ class YoloPredic(object):
     def __init__(self):
         self.input_size = 416  # 输入图片尺寸（默认正方形）
         self.num_classes = 38  # 种类数
-        self.score_threshold = 0.01
+        self.score_threshold = 0.6
         self.iou_threshold = 0.5
-        self.pb_file =  "E:/ckpt_dirs/zg_project/20210401/yolo_model.pb" # pb文件地址
+        self.pb_file = "E:/ckpt_dirs/zg_project/20210517/yolov3.pb"  # pb文件地址
         self.write_image = True  # 是否画图
         self.show_label = True  # 是否显示标签
 
@@ -64,22 +65,27 @@ class YoloPredic(object):
                                     np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
                                     np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
 
-        bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, 0.1)
+        bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, self.score_threshold)
         print(bboxes)
         bboxes = utils.nms(bboxes, self.iou_threshold)
 
         return bboxes
+
     def result(self, image_path):
         image = cv2.imread(image_path)  # 图片读取
-        bboxes_pr= self.predict(image)  # 预测结果
+        bboxes_pr = self.predict(image)  # 预测结果
         print(bboxes_pr)
         if self.write_image:
             image = utils.draw_bbox(image, bboxes_pr, show_label=self.show_label)  # 画图
             drawed_img_save_to_path = str(image_path).split("/")[-1]
-            cv2.imwrite(drawed_img_save_to_path, image)
+            cv2.imwrite(save_root+"/"+drawed_img_save_to_path, image)
 
 
 if __name__ == '__main__':
-    img_path = "E:/zg_data/202005/JPGImages/72_200525_ZG1__xz_small_chestnut.jpg"  # 图片地址
+
+    img_path = "F:/Test_set/ZG/testset_results/no_result_multi_0517_75_score80_di_wan_all_original_adjust"  # 图片地址
+    save_root = "F:/Test_set/ZG/testset_results/no_result_multi_0517_75_score80_di_wan_all_original_adjust_detect"
+    if not os.path.exists(save_root):os.mkdir(save_root)
     Y = YoloPredic()
-    Y.result(img_path)
+    for jpg in os.listdir(img_path):
+        Y.result(img_path+"/"+jpg)

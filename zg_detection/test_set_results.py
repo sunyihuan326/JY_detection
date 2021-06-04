@@ -115,16 +115,17 @@ class YoloTest(object):
         image = cv2.imread(image_path)  # 图片读取
         bboxes_pr = self.predict(image)  # 预测结果
 
-        # if self.write_image:
-        #     image = utils.draw_bbox(image, bboxes_pr, show_label=self.show_label)
-        #     drawed_img_save_to_path = str(image_path).split("/")[-1]
-        #     drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[0] + "_" + ".jpg"  # 图片保存地址
-        #     cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)  # 保存图片
+        if self.write_image:
+            image = utils.draw_bbox(image, bboxes_pr, show_label=True)
+            drawed_img_save_to_path = str(image_path).split("/")[-1]
+            drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[
+                                          0] + ".jpg"  # 图片保存地址
+            cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)  # 保存图片g_save_to_path, image)  # 保存图片
 
         # 预测结果,bboxes_pr输出格式为[x_min, y_min, x_max, y_max, probability, cls_id]
         if len(bboxes_pr) > 0:
             bboxes_pr = correct_bboxes(bboxes_pr)
-            if bboxes_pr[0][-2] > s_thre:
+            if bboxes_pr[0][-2] >= s_thre:
                 return bboxes_pr
             else:
                 return []
@@ -213,9 +214,9 @@ if __name__ == '__main__':
     classes_id = classes_id38  #######
     classes = classes_label38  #######
     mode = "multi_0517"  #######
-    tag = "_75_score80_di"
-    img_dir = "F:/Test_set/ZG/testset"  # 文件夹地址
-    save_root = "F:/Test_set/ZG/testset_results"
+    tag = "_75_score80_bri"
+    img_dir = "F:/Test_set/ZG/202104_test"  # 文件夹地址
+    save_root = "F:/Test_set/ZG/202104_test_results"
     save_dir = "{0}/detect_{1}{2}".format(save_root, mode, tag)  # 图片保存地址
     if not os.path.exists(save_dir): os.mkdir(save_dir)
 
@@ -253,7 +254,8 @@ if __name__ == '__main__':
     food_img_pre = []
     # for i in range(len(classes)):
     for i in range(38):
-        if i == 12 or i == 29 or i == 30 or i == 31 or i == 32 or i == 33 or i == 34 or i == 37:
+        # if i == 12 or i == 29 or i == 30 or i == 31 or i == 32 or i == 33 or i == 34 or i == 37:
+        if i == 12 or i == 30 or i == 31 or i == 32 or i == 33 or i == 34 or i == 37:
             continue
         else:
             c = classes[i].lower()
@@ -284,17 +286,20 @@ if __name__ == '__main__':
                         image_path = img_dirs + "/" + file
                         bboxes_pr = Y.result(image_path, save_c_dir, 0.8)  # 预测每一张结果并保存
 
-                        # 保存图片
-                        image = cv2.imread(image_path)  # 图片读取
-                        image = utils.draw_bbox(image, bboxes_pr, show_label=True)
                         drawed_img_save_to_path = str(image_path).split("/")[-1]
                         drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[
-                                                          0] + ".jpg"  # 图片保存地址
-                        cv2.imwrite(save_c_dir + "/" + drawed_img_save_to_path, image)  # 保存图片
+                                                      0] + ".jpg"  # 图片保存地址
+                        # # 保存图片
+                        # image = cv2.imread(image_path)  # 图片读取
+                        # image = utils.draw_bbox(image, bboxes_pr, show_label=True)
+                        # drawed_img_save_to_path = str(image_path).split("/")[-1]
+                        # drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[
+                        #                                   0] + ".jpg"  # 图片保存地址
+                        # cv2.imwrite(save_c_dir + "/" + drawed_img_save_to_path, image)  # 保存图片
 
                         if len(bboxes_pr) == 0:  # 无任何结果返回，输出并统计+1
                             error_noresults += 1
-                            shutil.copy(image_path, noresult_dir + "/" + file)
+                            shutil.copy(save_c_dir + "/" + drawed_img_save_to_path, noresult_dir + "/" + file)
                         else:
                             pre = int(bboxes_pr[0][-1])
                             food_img_pre.append(pre)
@@ -309,12 +314,8 @@ if __name__ == '__main__':
                                     food_acc += 1
                                     c_food_right_list.append(str(c) + "/" + file)  # 食材正确将名字写入c_food_right_list中
                                 else:
-
-                                    drawed_img_save_to_path = str(image_path).split("/")[-1]
-                                    drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[
-                                                                  0] + ".jpg"  # 图片保存地址
                                     shutil.copy(save_c_dir + "/" + drawed_img_save_to_path,
-                                                fooderror_dirs + "/" + file.split(".jpg")[0]  + str(pre) + ".jpg")
+                                                fooderror_dirs + "/" + file.split(".jpg")[0] + str(pre) + ".jpg")
 
             sheet1.write(i + 2, 3, food_acc)  # 食材准确率写入
             sheet1.write(i + 2, 0, c)

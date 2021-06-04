@@ -7,10 +7,11 @@
 
 '''
 
-from PIL import Image, ImageStat,ImageEnhance
+from PIL import Image, ImageStat, ImageEnhance
 import numpy as np
 from skimage import data, exposure, img_as_float
 import matplotlib.pyplot as plt
+import os
 
 
 def get_bright(img):
@@ -36,16 +37,26 @@ def adjust_bri(img_path):
     '''
     img = Image.open(img_path)
     b = get_bright(img)
-    if b > 100 or b < 60:  # 针对亮度值b，过大或者过小的调整
-        g = round(60/b, 2)
+    print(b)
+    if b > 110:  # 针对亮度值b，过大调整
+        g = round(110 / b, 2)
         enh_bri = ImageEnhance.Brightness(img)
         img = enh_bri.enhance(g)
         # img = exposure.adjust_gamma(np.array(img), g)
+    elif b < 60:
+        g = round(60 / b, 2)
+        enh_bri = ImageEnhance.Brightness(img)
+        img = enh_bri.enhance(g)
     return img
 
 
 if __name__ == "__main__":
-    img_path = "./temp_img/20210115154509_chestnut.jpg"
-    img = adjust_bri(img_path)
-    # img = Image.fromarray(img)
-    img.save("./temp_img/20210115154509_chestnut_adjust.jpg")
+    jpg_dir = "F:/Test_set/ZG/testset_results/no_result_multi_0517_75_score80_di_wan(终版)_all_original"
+    save_dir = "F:/Test_set/ZG/testset_results/no_result_multi_0517_75_score80_di_wan(终版)_all_original_adjust"
+    if not os.path.exists(save_dir):os.mkdir(save_dir)
+    for jpg in os.listdir(jpg_dir):
+        img_path = jpg_dir + "/" + jpg
+        # img_path = "./temp_img/20210118141758_babycabbage.jpg"
+        img = adjust_bri(img_path)
+        # img = Image.fromarray(img)
+        img.save(save_dir + "/" + jpg)
