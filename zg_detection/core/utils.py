@@ -36,10 +36,10 @@ def adjust_bri(img):
         enh_bri = ImageEnhance.Brightness(img)
         img = enh_bri.enhance(g)
         # img = exposure.adjust_gamma(np.array(img), g)
-    # elif b < 50:
-    #     g = round(50 / b, 2)
-    #     enh_bri = ImageEnhance.Brightness(img)
-    #     img = enh_bri.enhance(g)
+    elif b < 50:
+        g = round(50 / b, 2)
+        enh_bri = ImageEnhance.Brightness(img)
+        img = enh_bri.enhance(g)
     return img
 
 
@@ -62,11 +62,11 @@ def get_anchors(anchors_path):
 
 def image_preporcess(image, target_size, gt_boxes=None):
     # 加入亮度判断、调整
-    image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    image = adjust_bri(image)
-    image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
+    # image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    # image = adjust_bri(image)
+    # image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
     ih, iw = target_size
     h, w, _ = image.shape
 
