@@ -24,6 +24,12 @@ def get_bright(img):
     return start.mean[0]
 
 
+def gamma_trans(img, gamma):
+    gamma_table = [np.power(x / 255.0, gamma) * 255.0 for x in range(256)]
+    gamma_table = np.round(np.array(gamma_table)).astype(np.uint8)
+    return cv2.LUT(img, gamma_table)
+
+
 def adjust_bri(img):
     '''
     根据亮度值调整
@@ -31,15 +37,14 @@ def adjust_bri(img):
     :return:
     '''
     b = get_bright(img)
-    if b > 120:  # 针对亮度值b，过大调整
-        g = round(120 / b, 2)
-        enh_bri = ImageEnhance.Brightness(img)
-        img = enh_bri.enhance(g)
-        # img = exposure.adjust_gamma(np.array(img), g)
-    elif b < 50:
-        g = round(50 / b, 2)
-        enh_bri = ImageEnhance.Brightness(img)
-        img = enh_bri.enhance(g)
+    img = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+    if b > 110:  # 针对亮度值b，过大调整
+        g = round(b / 110, 2)
+        img = gamma_trans(img, g)
+    elif b < 60:
+        g = round(b / 60, 2)
+        img = gamma_trans(img, g)
+    img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     return img
 
 
@@ -62,11 +67,11 @@ def get_anchors(anchors_path):
 
 def image_preporcess(image, target_size, gt_boxes=None):
     # 加入亮度判断、调整
-    # image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    # image = adjust_bri(image)
-    # image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
+    image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    image = adjust_bri(image)
+    image = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
-    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
     ih, iw = target_size
     h, w, _ = image.shape
 

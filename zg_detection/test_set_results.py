@@ -214,7 +214,7 @@ if __name__ == '__main__':
     classes_id = classes_id38  #######
     classes = classes_label38  #######
     mode = "multi_0517"  #######
-    tag = "_75_score80_bri"
+    tag = "_75_score80_gamma"
     img_dir = "F:/Test_set/ZG/202104_test"  # 文件夹地址
     save_root = "F:/Test_set/ZG/202104_test_results"
     save_dir = "{0}/detect_{1}{2}".format(save_root, mode, tag)  # 图片保存地址

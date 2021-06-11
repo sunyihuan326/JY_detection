@@ -18,61 +18,6 @@ def Color_temperature_wb(img):
     :param img:
     :return:
     '''
-    img = img.copy()
-    b, g, r = cv2.split(img)
-    m, n, t = img.shape
-    sum_ = np.sum(img, 2)
-    su= sum_.flatten()
-    print(su)
-    sum_ = np.sort(su)
-    print(sum_)
-    Y = 765
-    num, key = 0, 0
-    ratio = 0.01
-    while Y >= 0:
-        num += hists[Y]
-        if num > m * n * ratio / 100:
-            key = Y
-            break
-        Y = Y - 1
-
-    sum_b, sum_g, sum_r = 0, 0, 0
-    time = 0
-    for i in range(m):
-        for j in range(n):
-            if sum_[i][j] >= key:
-                sum_b += b[i][j]
-                sum_g += g[i][j]
-                sum_r += r[i][j]
-                time = time + 1
-
-    avg_b = sum_b / time
-    avg_g = sum_g / time
-    avg_r = sum_r / time
-
-    maxvalue = float(np.max(img))
-    # maxvalue = 255
-    for i in range(m):
-        for j in range(n):
-            b = int(img[i][j][0]) * maxvalue / int(avg_b)
-            g = int(img[i][j][1]) * maxvalue / int(avg_g)
-            r = int(img[i][j][2]) * maxvalue / int(avg_r)
-            if b > 255:
-                b = 255
-            if b < 0:
-                b = 0
-            if g > 255:
-                g = 255
-            if g < 0:
-                g = 0
-            if r > 255:
-                r = 255
-            if r < 0:
-                r = 0
-            img[i][j][0] = b
-            img[i][j][1] = g
-            img[i][j][2] = r
-
     result = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     avg_a = np.average(result[:, :, 1])
     avg_b = np.average(result[:, :, 2])
@@ -118,9 +63,46 @@ def gray_average_wb(img):
     return dst
 
 
+def perfect_flect_wb(img):
+    '''
+    全反射白平衡
+    :param img:
+    :return:
+    '''
+    height, width = img.shape[:2]
+    thresh = height * width * 0.1
+    sum_array = np.sum(img.copy(), axis=2)
+    MaxVal = np.max(sum_array)
+    HistRGB = np.bincount(sum_array.reshape(1, -1)[0])
+    HistRGB_Sum = np.add.accumulate(HistRGB[::-1])
+    Threshold = np.argwhere(HistRGB_Sum > thresh)[0][0]
+
+    Thresh_array = np.where(sum_array > Threshold, 1, 0)
+    cnt = np.count_nonzero(Thresh_array)
+
+    Thresh_array = Thresh_array[:, :, np.newaxis].repeat(3, axis=2)
+    sumBGR = np.sum(np.multiply(img, Thresh_array), axis=(0, 1))
+    AvgB = sumBGR[0] / cnt
+    AvgG = sumBGR[1] / cnt
+    AvgR = sumBGR[2] / cnt
+
+
+    dst = np.zeros_like(img, dtype=np.float64)
+    dst[:, :, 0] = np.divide(np.multiply(img[:, :, 0], MaxVal), AvgB)
+    dst[:, :, 1] = np.divide(np.multiply(img[:, :, 1], MaxVal), AvgG)
+    dst[:, :, 2] = np.divide(np.multiply(img[:, :, 2], MaxVal), AvgR)
+
+    # dst = np.where(dst > 255, 255, 0).astype(np.uint8)
+
+    return dst
+
+
 if __name__ == '__main__':
     img_path = "C:/Users/sunyihuan/Desktop/t/11.jpg"
 
     start_time = time.time()  # 开始时间
     img = cv2.imread(img_path, 1)
-    Color_temperature_wb(img)
+    cv2.imshow("img", img)
+    image = perfect_flect_wb(img)
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
