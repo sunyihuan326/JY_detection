@@ -25,7 +25,7 @@ class YoloPredic(object):
         self.num_classes = 38  # 种类数
         self.score_threshold = 0.6
         self.iou_threshold = 0.5
-        self.pb_file = "E:/ckpt_dirs/zg_project/20210517/yolov3.pb"  # pb文件地址
+        self.pb_file = "./yolov3.pb"  # pb文件地址
         self.write_image = True  # 是否画图
         self.show_label = True  # 是否显示标签
 
@@ -40,7 +40,7 @@ class YoloPredic(object):
 
             # 输入
             self.input = self.sess.graph.get_tensor_by_name("define_input/input_data:0")
-            self.trainable = self.sess.graph.get_tensor_by_name("define_input/training:0")
+            # self.trainable = self.sess.graph.get_tensor_by_name("define_input/training:0")
 
             # 输出
             self.pred_sbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_sbbox/concat_2:0")
@@ -58,7 +58,7 @@ class YoloPredic(object):
             [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
             feed_dict={
                 self.input: image_data,
-                self.trainable: False
+                # self.trainable: False
             }
         )
         pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),

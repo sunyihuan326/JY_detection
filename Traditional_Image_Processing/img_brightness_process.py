@@ -33,7 +33,6 @@ def get_bright(img):
     img = img.crop(crop_size)
     img = img.convert("YCbCr")
     start = ImageStat.Stat(img)
-    # print(start.mean[0])
     return start.mean[0]
 
 
