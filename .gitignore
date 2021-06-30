@@ -151,3 +151,7 @@ zg_detection/checkpoint
 zg_detection/model
 zg_detection/save
 zg_detection/pb_model
+
+xdsj_detection/models
+xdsj_detection/data
+xdsj_detection/image
