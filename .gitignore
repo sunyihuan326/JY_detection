@@ -152,6 +152,6 @@ zg_detection/model
 zg_detection/save
 zg_detection/pb_model
 
-xdsj_detection/models
-xdsj_detection/data
-xdsj_detection/image
+xdsj_detection(bai)/models
+xdsj_detection(bai)/data
+xdsj_detection(bai)/image

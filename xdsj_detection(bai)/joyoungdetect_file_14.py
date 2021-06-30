@@ -204,14 +204,14 @@ if __name__ == '__main__':
                              'le')
     parser.add_argument('-v', '--video-path',
                         type=str,
-                        default="E:/JY_detection/xdsj_detection/image/video/distance.mp4",
+                        default="E:/JY_detection/xdsj_detection(bai)/image/video/distance.mp4",
                         help='The path to the video file')
     parser.add_argument('-vo', '--video-output-path',
                         type=str,
                         default='./image/video/output.avi',
                         help='The path of the output video file')
 
-    model_path="E:/JY_detection/xdsj_detection/models/train_syh/model.ckpt-10000"
+    model_path= "/xdsj_detection(bai)/models/train_syh/model.ckpt-10000"
 
     focalLength = 191.82  # 811.82
     # KNOWN_WIDTH = 11.69 #19.68  #50cm inches 11.69  1 inches = 2.54 cm
