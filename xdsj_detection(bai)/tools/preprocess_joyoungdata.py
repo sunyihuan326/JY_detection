@@ -16,7 +16,7 @@ classes_num = {'flip-flops(black)': 1, 'dustbin(plastic)': 2, 'dishcloth(green)'
 
 YOLO_ROOT = os.path.abspath('./')
 DATA_PATH = os.path.join(YOLO_ROOT, 'data\\JoyRobot_aug\\')
-OUTPUT_PATH = os.path.join(YOLO_ROOT, 'data\\JoyRobot_train.txt')
+OUTPUT_PATH = os.path.join(YOLO_ROOT, 'data\\JoyRobot_train14.txt')
 
 def is_float(i):
     if i.count('.') == 1:

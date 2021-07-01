@@ -80,8 +80,8 @@ def replace_txt_path(txt_path, src_txtpath, file_path, target_path):
 
 
 if __name__ == "__main__":
-    txt_path = "F:/model_data/XDSJ/2020_data_bai/JoyRobot_train.txt"
-    new_txt_name = "F:/交接资料-白椿山/项目代码/tensorflow-yolo-python/data/JoyRobot_train.txt"
+    txt_path = "F:/model_data/XDSJ/2020_data_bai/JoyRobot_train14.txt"
+    new_txt_name = "F:/交接资料-白椿山/项目代码/tensorflow-yolo-python/data/JoyRobot_train14.txt"
     file_path = "/media/joy2018/E/bcsMain/MyCode/tensorflow-yolo-python0111/data/JoyRobot_aug/train/JoyRobot_1"
 
     # change_txt(txt_path, new_txt_name, file_path, "serve")
