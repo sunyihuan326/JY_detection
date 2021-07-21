@@ -18,7 +18,7 @@ classes_num = {'flip-flops(black)': 1, 'dustbin(plastic)': 2, 'dishcloth(green)'
 
 YOLO_ROOT = os.path.abspath('./')
 DATA_PATH = os.path.join(YOLO_ROOT, 'F:\\model_data\\XDSJ\\2020_data_bai')
-OUTPUT_PATH = os.path.join(YOLO_ROOT, 'E:\\JY_detection\\xdsj_detection(bai)\\data\\JoyRobot_test14.txt')
+OUTPUT_PATH = os.path.join(YOLO_ROOT, 'E:\\JY_detection\\xdsj_detection0\\data\\JoyRobot_test14.txt')
 
 
 def parse_xml(xml_file):

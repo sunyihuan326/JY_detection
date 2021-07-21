@@ -5,7 +5,7 @@ import os
 
 sys.path.append('./')
 
-from xdsj_detection.yolo.net.yolo_tiny_net import YoloTinyNet
+from xdsj_detection0.yolo.net.yolo_tiny_net import YoloTinyNet
 import tensorflow as tf
 import cv2
 import numpy as np
@@ -18,7 +18,7 @@ import math
 # python joyoungdetect_file.py -f=".\\image\\folader"
 # python joyoungdetect_file.py -v=".\\image\\output_cloth.avi"
 
-classes_name = ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14"]
+classes_name = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14"]
 
 # classes_display = {'01': 'flip-flops(black)', '02': 'dustbin(plastic)', '03': 'dishcloth(green)',
 #                    '04': 'dustbin(stainless)','05': 'slipper(grey)', '06': 'dishcloth(blue)',
@@ -197,21 +197,23 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--image-path',
                         type=str,
+                        # default="E:/JY_detection/xdsj_detection0/image/01100003.jpg",
                         help='The path to the image file')
     parser.add_argument('-f', '--folder-path',
                         type=str,
+                        default="F:/model_data/XDSJ/2020_data_bai/test/JoyRobot_1/JPEGImages",
                         help='The path to the image fi'
                              'le')
     parser.add_argument('-v', '--video-path',
                         type=str,
-                        default="E:/JY_detection/xdsj_detection(bai)/image/video/distance.mp4",
+                        # default="E:/JY_detection/xdsj_detection0/image/video/distance.mp4",
                         help='The path to the video file')
     parser.add_argument('-vo', '--video-output-path',
                         type=str,
                         default='./image/video/output.avi',
                         help='The path of the output video file')
 
-    model_path= "/xdsj_detection(bai)/models/train_syh/model.ckpt-10000"
+    model_path= "E:/JY_detection/xdsj_detection0/models/model.ckpt"
 
     focalLength = 191.82  # 811.82
     # KNOWN_WIDTH = 11.69 #19.68  #50cm inches 11.69  1 inches = 2.54 cm
@@ -306,9 +308,10 @@ if __name__ == '__main__':
 
             # rectangle
             # class_name = classes_name[class_num]
-            cv2.rectangle(resized_img, (int(xmin), int(ymin)), (int(xmax), int(ymax) - 10), (0, 0, 255))
+            # print(class_num)
+            cv2.rectangle(resized_img, (int(xmin), int(ymin)), (int(xmax), int(ymax)), (0, 0, 255))
             # cv2.putText(resized_img, class_name, (int(xmin), int(ymin)), 2, 1.5, (0, 0, 255))
-            cv2.putText(resized_img, classes_display[class_num], (int(xmin), int(ymin - 10)), 2, 1.0, (0, 0, 255))
+            cv2.putText(resized_img, str(class_num), (int(xmin), int(ymin)), 2, 1.0, (0, 0, 255))
             cv2.putText(resized_img, "%.2fcm, %.2fdeg." % (inches * 30.48 / 12, deg_tmp),
                         (resized_img.shape[1] - 350, resized_img.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX,
                         1.0, (0, 255, 0), 2)
@@ -321,6 +324,8 @@ if __name__ == '__main__':
     elif FLAGS.folder_path:
         print("This is folder_path mode")
         # Read the image
+        save_path = "F:/model_data/XDSJ/2020_data_bai/test/JoyRobot_1/JPEGImages_detection"
+        if not os.path.exists(save_path):os.mkdir(save_path)
         for root, dir, files in os.walk(FLAGS.folder_path):
             for file in files:
                 folder_image_path = root + "\\" + str(file)
@@ -406,12 +411,13 @@ if __name__ == '__main__':
                     # cv2.namedWindow("out.jpg", 0)
                     # cv2.imshow('out.jpg', resized_img)
                     # cv2.imwrite(os.path.dirname(root) + "\\" + "outImage" + "\\" + "out_" + str(file), resized_img)
-                    cv2.imwrite(".\\image\\" + "showImage" + "\\" + "out_" + str(file), resized_img)
+
+                    cv2.imwrite(save_path+"/" + "out_" + str(file), resized_img)
                     print("********************")
-                    print(os.path.dirname(root) + "\\" + "showImage" + "\\" + "out_" + str(file))
+                    print(save_path+"/" + "out_" + str(file))
                     print("********************")
                     # cv2.waitKey(0)
-                    cv2.waitKey(10)
+                    # cv2.waitKey(10)
 
     elif FLAGS.video_path:
         print("This is video_path mode")

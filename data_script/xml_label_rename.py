@@ -10,6 +10,12 @@ import os
 import xml.etree.ElementTree as ET
 
 
+classes_display = {'01': 'shoes', '02': 'dustbin', '03': 'dishcloth',
+                   '04': 'dustbin', '05': 'shoes', '06': 'dishcloth',
+                   '07': 'shoes', '08': 'socks', '09': 'dishcloth',
+                   '10': 'socks', '11': 'line', '12': 'line',
+                   '13': 'line', '14': 'None'}
+
 def changesku(inputpath, label_name='Potatom'):
     '''
     更改标签名称
@@ -27,7 +33,9 @@ def changesku(inputpath, label_name='Potatom'):
                 for sku in object1.findall('name'):
                     # if sku.text=="corn_others":
                     #     print(file)
-                    sku.text = label_name
+                    print(sku.text)
+                    sku.text = classes_display[sku.text]
+                    print(sku.text)
                     tree.write(file, encoding='utf-8')
 
 
@@ -53,10 +61,10 @@ def check_labelname(inputpath, label_name='Potatom'):
 
 
 if __name__ == '__main__':
-    inputpath = "F:/serve_data/202101-03formodel/exrtact_file/Annotations"  # 这是xml文件的文件夹的绝对地址
-
+    inputpath = "F:/model_data/XDSJ/2020_data_bai/test/JoyRobot_1/Annotations_new"  # 这是xml文件的文件夹的绝对地址
+    changesku(inputpath, "roastedchicken")
     # cls_list = ["Pizzasix", "Pizzafour"]  # Pizza合并
-    cls_list = ["duck"]
-    for c in cls_list:
-        input_dir = inputpath + "/" + c
-        changesku(input_dir, "roastedchicken")
+    # cls_list = ["duck"]
+    # for c in cls_list:
+    #     input_dir = inputpath + "/" + c
+    #     changesku(input_dir, "roastedchicken")

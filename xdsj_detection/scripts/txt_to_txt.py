@@ -35,6 +35,6 @@ def txt_file_change(src_txt_path, dst_txt_path):
 
 
 if __name__ == "__main__":
-    src_txt_path = 'E:\\JY_detection\\xdsj_detection(bai)\\data\\JoyRobot_train14.txt'
+    src_txt_path = '/xdsj_detection0\\data\\JoyRobot_train14.txt'
     dst_txt_path = "E:/JY_detection/xdsj_detection/data/dataset/JoyRobot_train14.txt"
     txt_file_change(src_txt_path, dst_txt_path)

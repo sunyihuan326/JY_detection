@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 # coding=utf-8
-
 import cv2
 import random
 import colorsys
@@ -27,7 +26,7 @@ def get_anchors(anchors_path):
 
 def image_preporcess(image, target_size, gt_boxes=None):
 
-    # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float32)
 
     ih, iw    = target_size
     h,  w, _  = image.shape
@@ -50,12 +49,12 @@ def image_preporcess(image, target_size, gt_boxes=None):
         return image_paded, gt_boxes
 
 
-def draw_bbox(image, bboxes, show_label=True):
+def draw_bbox(image, bboxes, classes=read_class_names(cfg.YOLO.CLASSES), show_label=True):
     """
     bboxes: [x_min, y_min, x_max, y_max, probability, cls_id] format coordinates.
     """
-    classes = read_class_names(cfg.YOLO.CLASSES)
-    num_classes = len(classes)+100
+
+    num_classes = len(classes)
     image_h, image_w, _ = image.shape
     hsv_tuples = [(1.0 * x / num_classes, 1., 1.) for x in range(num_classes)]
     colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
@@ -70,9 +69,6 @@ def draw_bbox(image, bboxes, show_label=True):
         fontScale = 0.5
         score = bbox[4]
         class_ind = int(bbox[5])
-        classes[40] = "potatom"
-        classes[41] = "sweetpotatom"
-        classes[101] = "chiffon_size4"
         bbox_color = colors[class_ind]
         bbox_thick = int(0.6 * (image_h + image_w) / 600)
         c1, c2 = (coor[0], coor[1]), (coor[2], coor[3])
@@ -200,6 +196,3 @@ def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
     coors, scores, classes = pred_coor[mask], scores[mask], classes[mask]
 
     return np.concatenate([coors, scores[:, np.newaxis], classes[:, np.newaxis]], axis=-1)
-
-
-

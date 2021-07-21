@@ -7,7 +7,7 @@ import numpy as np
 import re
 from keras import backend as K
 
-from xdsj_detection.yolo.net.net import Net
+from xdsj_detection0.yolo.net.net import Net
 
 class YoloTinyNet(Net):
 

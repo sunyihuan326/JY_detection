@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 import xdsj_detection.core.utils as utils
 import xdsj_detection.core.common as common
-import xdsj_detection.core.backbone as backbone
 from xdsj_detection.core.config import cfg
 
 
@@ -24,25 +23,46 @@ class YOLOV3(object):
         self.anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE
         self.iou_loss_thresh = cfg.YOLO.IOU_LOSS_THRESH
         self.upsample_method = cfg.YOLO.UPSAMPLE_METHOD
+        self.input_data = input_data
 
         try:
-            self.conv_lbbox, self.conv_mbbox= self.__build_nework(input_data)
+            self.conv_lbbox, self.conv_mbbox = self.__build_nework()
         except:
             raise NotImplementedError("Can not build up yolov3 network!")
 
         with tf.variable_scope('pred_lbbox'):
             self.pred_lbbox = self.decode(self.conv_lbbox, self.anchors[0], self.strides[0])
-            print("self.pred_lbbox::::",self.pred_lbbox)
+            print("self.pred_lbbox::::", self.pred_lbbox)
 
         with tf.variable_scope('pred_mbbox'):
             self.pred_mbbox = self.decode(self.conv_mbbox, self.anchors[1], self.strides[1])
-            print("self.pred_mbbox::::",self.pred_mbbox)
+            print("self.pred_mbbox::::", self.pred_mbbox)
 
-    def __build_nework(self, input_data):
+    def __build_nework(self):
 
-        route_1, route_2, input_data = backbone.tiny_backbone(input_data, self.trainable)
-
-        input_data = common.convolutional(input_data, (3, 3, 1024, 256), self.trainable, 'conv7')
+        input_data = common.convolutional(self.input_data, filters_shape=(3, 3, 3, 16),
+                                          trainable=self.trainable, name='conv0')
+        input_data = tf.layers.max_pooling2d(input_data, 2, 2)
+        input_data = common.convolutional(input_data, filters_shape=(3, 3, 16, 32),
+                                          trainable=self.trainable, name='conv1')
+        input_data = tf.layers.max_pooling2d(input_data, 2, 2)
+        input_data = common.convolutional(input_data, filters_shape=(3, 3, 32, 64),
+                                          trainable=self.trainable, name='conv2')
+        input_data = tf.layers.max_pooling2d(input_data, 2, 2)
+        input_data = common.convolutional(input_data, filters_shape=(3, 3, 64, 128),
+                                          trainable=self.trainable, name='conv3')
+        input_data = tf.layers.max_pooling2d(input_data, 2, 2)
+        input_data = common.convolutional(input_data, filters_shape=(3, 3, 128, 256),
+                                          trainable=self.trainable, name='conv4')
+        route_1 = input_data
+        print("route_1:::::::::::::::::::::::::::::",route_1)
+        input_data = tf.layers.max_pooling2d(input_data, 2, 2)
+        input_data = common.convolutional(input_data, filters_shape=(3, 3, 256, 512),
+                                          trainable=self.trainable, name='conv5')
+        input_data = common.convolutional(input_data, filters_shape=(3, 3, 512, 1024),
+                                          trainable=self.trainable, name='conv6')
+        input_data = common.convolutional(input_data, filters_shape=(1, 1, 1024, 256),
+                                          trainable=self.trainable, name='conv7')
         conv_lobj_branch = common.convolutional(input_data, (3, 3, 256, 512), self.trainable, 'conv8')
 
         conv_lbbox = common.convolutional(conv_lobj_branch, (1, 1, 512, 3 * (self.num_class + 5)),
@@ -50,6 +70,7 @@ class YOLOV3(object):
 
         input_data = common.convolutional(input_data, (1, 1, 256, 128), self.trainable, 'conv9')
         input_data = common.upsample(input_data, name='upsample0', method=self.upsample_method)
+        print("input_data::::::::::::::::::",input_data)
 
         with tf.variable_scope('route_1'):
             input_data = tf.concat([input_data, route_1], axis=-1)
@@ -198,7 +219,7 @@ class YOLOV3(object):
         return giou_loss, conf_loss, prob_loss, tf.reduce_sum(self.giou, axis=[1, 2, 3, 4]), tf.reduce_sum(
             self.bbox_loss_scale)
 
-    def compute_loss(self,label_mbbox, label_lbbox, true_mbbox, true_lbbox):
+    def compute_loss(self, label_mbbox, label_lbbox, true_mbbox, true_lbbox):
 
         with tf.name_scope('medium_box_loss'):
             loss_mbbox = self.loss_layer(self.conv_mbbox, self.pred_mbbox, label_mbbox, true_mbbox,
@@ -215,7 +236,6 @@ class YOLOV3(object):
             conf_loss = loss_mbbox[1] + loss_lbbox[1]
 
         with tf.name_scope('prob_loss'):
-            prob_loss =loss_mbbox[2] + loss_lbbox[2]
+            prob_loss = loss_mbbox[2] + loss_lbbox[2]
 
         return giou_loss, conf_loss, prob_loss
-

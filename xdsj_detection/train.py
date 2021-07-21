@@ -1,25 +1,18 @@
 #! /usr/bin/env python
 # coding=utf-8
-'''
-仅pred_sbbox、pred_mbbox两个concate
-'''
+
 
 import os
 import time
 import shutil
 import numpy as np
-import tensorflow as tf
 from tensorflow.python.framework import graph_util
+import tensorflow as tf
 import xdsj_detection.core.utils as utils
 from tqdm import tqdm
 from xdsj_detection.core.dataset import Dataset
-from xdsj_detection.core.yolov3_tiny import YOLOV3
+from xdsj_detection.core.yolov3 import YOLOV3
 from xdsj_detection.core.config import cfg
-
-import os
-
-config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.9  # 占用GPU的显存
 
 class YoloTrain(object):
     def __init__(self):
@@ -31,24 +24,25 @@ class YoloTrain(object):
         self.first_stage_epochs = cfg.TRAIN.FISRT_STAGE_EPOCHS
         self.second_stage_epochs = cfg.TRAIN.SECOND_STAGE_EPOCHS
         self.warmup_periods = cfg.TRAIN.WARMUP_EPOCHS
+        self.train_input_size= cfg.TRAIN.INPUT_SIZE
         self.initial_weight = cfg.TRAIN.INITIAL_WEIGHT
-        self.train_input_size = cfg.TRAIN.INPUT_SIZE
         self.time = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
-        self.max_bbox_per_scale = 60
+        self.max_bbox_per_scale = 50
         self.train_logdir = "./data/log/train"
         self.trainset = Dataset('train')
         self.testset = Dataset('test')
         self.steps_per_period = len(self.trainset)
         self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
 
-
         with tf.name_scope('define_input'):
             self.input_data = tf.placeholder(dtype=tf.float32,
                                              shape=(None, self.train_input_size, self.train_input_size, 3),
                                              name='input_data')
+            self.label_sbbox = tf.placeholder(dtype=tf.float32, name='label_sbbox')
             self.label_mbbox = tf.placeholder(dtype=tf.float32, name='label_mbbox')
             self.label_lbbox = tf.placeholder(dtype=tf.float32, name='label_lbbox')
+            self.true_sbboxes = tf.placeholder(dtype=tf.float32, name='sbboxes')
             self.true_mbboxes = tf.placeholder(dtype=tf.float32, name='mbboxes')
             self.true_lbboxes = tf.placeholder(dtype=tf.float32, name='lbboxes')
             self.trainable = tf.placeholder(dtype=tf.bool, name='training')
@@ -57,8 +51,8 @@ class YoloTrain(object):
             self.model = YOLOV3(self.input_data, self.trainable)
             self.net_var = tf.global_variables()
             self.giou_loss, self.conf_loss, self.prob_loss = self.model.compute_loss(
-                self.label_mbbox, self.label_lbbox,
-                self.true_mbboxes, self.true_lbboxes)
+                self.label_sbbox, self.label_mbbox, self.label_lbbox,
+                self.true_sbboxes, self.true_mbboxes, self.true_lbboxes)
             self.loss = self.giou_loss + self.conf_loss + self.prob_loss
 
         with tf.name_scope('learn_rate'):
@@ -152,8 +146,10 @@ class YoloTrain(object):
                 _, summary, train_step_loss, global_step_val = self.sess.run(
                     [train_op, self.write_op, self.loss, self.global_step], feed_dict={
                         self.input_data: train_data[0],
+                        self.label_sbbox: train_data[1],
                         self.label_mbbox: train_data[2],
                         self.label_lbbox: train_data[3],
+                        self.true_sbboxes: train_data[4],
                         self.true_mbboxes: train_data[5],
                         self.true_lbboxes: train_data[6],
                         self.trainable: True,
@@ -163,34 +159,32 @@ class YoloTrain(object):
                 self.summary_writer.add_summary(summary, global_step_val)
                 pbar.set_description("train loss: %.2f" % train_step_loss)
 
-            # 保存模型
-            train_epoch_loss = np.mean(train_epoch_loss)
-            ckpt_file = "./checkpoint/yolov3_train_loss=%.4f.ckpt" % train_epoch_loss
-            self.saver.save(self.sess, ckpt_file, global_step=epoch)
-            #
-            # output = ["define_loss/pred_mbbox/concat_2","define_loss/pred_lbbox/concat_2"]
-            # constant_graph = graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, output)
-            # with tf.gfile.GFile('model/yolo_model_{}.pb'.format(epoch), mode='wb') as f:
-            #     f.write(constant_graph.SerializeToString())
-
             for test_data in self.testset:
                 test_step_loss = self.sess.run(self.loss, feed_dict={
                     self.input_data: test_data[0],
+                    self.label_sbbox: test_data[1],
                     self.label_mbbox: test_data[2],
                     self.label_lbbox: test_data[3],
+                    self.true_sbboxes: test_data[4],
                     self.true_mbboxes: test_data[5],
                     self.true_lbboxes: test_data[6],
                     self.trainable: False,
                 })
-                pbar.set_description("test loss: %.2f" % test_step_loss)
+
                 test_epoch_loss.append(test_step_loss)
 
             train_epoch_loss, test_epoch_loss = np.mean(train_epoch_loss), np.mean(test_epoch_loss)
+            ckpt_file = "./checkpoint/yolov3_test_loss=%.4f.ckpt" % train_epoch_loss
             log_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
             print("=> Epoch: %2d Time: %s Train loss: %.2f Test loss: %.2f Saving %s ..."
                   % (epoch, log_time, train_epoch_loss, test_epoch_loss, ckpt_file))
+            self.saver.save(self.sess, ckpt_file, global_step=epoch)
+
+            # output = ["define_loss/pred_sbbox/concat_2", "define_loss/pred_mbbox/concat_2",
+            #           "define_loss/pred_lbbox/concat_2"]
+            # constant_graph = graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, output)
+            # with tf.gfile.GFile('./model/yolo_model.pb', mode='wb') as f:
+            #     f.write(constant_graph.SerializeToString())
 
 
-if __name__ == '__main__':
-    YoloTrain().train()
-
+if __name__ == '__main__': YoloTrain().train()

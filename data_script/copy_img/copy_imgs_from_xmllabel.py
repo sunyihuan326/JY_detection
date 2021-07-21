@@ -1,9 +1,9 @@
 # coding:utf-8 
 '''
 
-按xml文件中的文件名称，从所有图片中拷贝部分至另一个文件夹
+按xml文件中的label名称，从所有图片中拷贝部分至另一个文件夹
 
-created on 2019/7/17
+created on 2021/7/2
 
 @author:sunyihuan
 '''

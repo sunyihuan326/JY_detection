@@ -1,7 +1,5 @@
 #! /usr/bin/env python
 # coding=utf-8
-# ================================================================
-
 
 import numpy as np
 import tensorflow as tf
@@ -13,29 +11,25 @@ from xdsj_detection.core.config import cfg
 
 class YOLOV3(object):
     """Implement tensoflow yolov3 here"""
+    def __init__(self, input_data, trainable):
 
-    def __init__(self, input_data,):
-
-        self.trainable = False
-        self.classes = utils.read_class_names(cfg.YOLO.CLASSES)
-        self.num_class = len(self.classes)
-        self.strides = np.array(cfg.YOLO.STRIDES)
-        self.anchors = utils.get_anchors(cfg.YOLO.ANCHORS)
+        self.trainable        = trainable
+        self.classes          = utils.read_class_names(cfg.YOLO.CLASSES)
+        self.num_class        = len(self.classes)
+        self.strides          = np.array(cfg.YOLO.STRIDES)
+        self.anchors          = utils.get_anchors(cfg.YOLO.ANCHORS)
         self.anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE
-        self.iou_loss_thresh = cfg.YOLO.IOU_LOSS_THRESH
-        self.upsample_method = cfg.YOLO.UPSAMPLE_METHOD
-        self.layer_nums = cfg.YOLO.LAYER_NUMS
+        self.iou_loss_thresh  = cfg.YOLO.IOU_LOSS_THRESH
+        self.upsample_method  = cfg.YOLO.UPSAMPLE_METHOD
 
         try:
-            self.conv_lbbox, self.conv_mbbox, self.conv_sbbox, self.out = self.__build_nework(input_data)
+            self.conv_lbbox, self.conv_mbbox, self.conv_sbbox = self.__build_nework(input_data)
         except:
             raise NotImplementedError("Can not build up yolov3 network!")
-        print(self.out)
-        self.predict_op = tf.argmax(input=self.out, axis=1, name='layer_classes')
-        print("layer_nums::", self.predict_op)
 
         with tf.variable_scope('pred_sbbox'):
             self.pred_sbbox = self.decode(self.conv_sbbox, self.anchors[0], self.strides[0])
+            print(self.pred_sbbox)
 
         with tf.variable_scope('pred_mbbox'):
             self.pred_mbbox = self.decode(self.conv_mbbox, self.anchors[1], self.strides[1])
@@ -45,26 +39,23 @@ class YOLOV3(object):
 
     def __build_nework(self, input_data):
 
-        self.route_1, self.route_2, self.input_data = backbone.darknet53(input_data, self.trainable)
-        self.out = tf.layers.flatten(self.input_data)
-        # out = tf.layers.dense(out, 400, activation=tf.nn.relu)
-        out = tf.layers.dense(self.out, self.layer_nums)  # layer 输出
+        route_1, route_2, input_data = backbone.darknet53(input_data, self.trainable)
 
-        # input_data = common.convolutional(input_data, (1, 1, 1024, 512), self.trainable, 'conv52')
-        # input_data = common.convolutional(input_data, (3, 3, 512, 1024), self.trainable, 'conv53')
-        # input_data = common.convolutional(input_data, (1, 1, 1024, 512), self.trainable, 'conv54')
-        # input_data = common.convolutional(input_data, (3, 3, 512, 1024), self.trainable, 'conv55')
-        input_data = common.convolutional(self.input_data, (1, 1, 1024, 512), self.trainable, 'conv56')
+        # input_data = common.convolutional(input_data, (1, 1, 1024,  512), self.trainable, 'conv52')
+        # input_data = common.convolutional(input_data, (3, 3,  512, 1024), self.trainable, 'conv53')
+        # input_data = common.convolutional(input_data, (1, 1, 1024,  512), self.trainable, 'conv54')
+        # input_data = common.convolutional(input_data, (3, 3,  512, 1024), self.trainable, 'conv55')
+        input_data = common.convolutional(input_data, (1, 1, 1024,  512), self.trainable, 'conv56')
 
         conv_lobj_branch = common.convolutional(input_data, (3, 3, 512, 1024), self.trainable, name='conv_lobj_branch')
-        conv_lbbox = common.convolutional(conv_lobj_branch, (1, 1, 1024, 3 * (self.num_class + 5)),
+        conv_lbbox = common.convolutional(conv_lobj_branch, (1, 1, 1024, 3*(self.num_class + 5)),
                                           trainable=self.trainable, name='conv_lbbox', activate=False, bn=False)
 
-        input_data = common.convolutional(input_data, (1, 1, 512, 256), self.trainable, 'conv57')
+        input_data = common.convolutional(input_data, (1, 1,  512,  256), self.trainable, 'conv57')
         input_data = common.upsample(input_data, name='upsample0', method=self.upsample_method)
 
         with tf.variable_scope('route_1'):
-            input_data = tf.concat([input_data, self.route_2], axis=-1)
+            input_data = tf.concat([input_data, route_2], axis=-1)
 
         input_data = common.convolutional(input_data, (1, 1, 768, 256), self.trainable, 'conv58')
         # input_data = common.convolutional(input_data, (3, 3, 256, 512), self.trainable, 'conv59')
@@ -72,15 +63,15 @@ class YOLOV3(object):
         # input_data = common.convolutional(input_data, (3, 3, 256, 512), self.trainable, 'conv61')
         # input_data = common.convolutional(input_data, (1, 1, 512, 256), self.trainable, 'conv62')
 
-        conv_mobj_branch = common.convolutional(input_data, (3, 3, 256, 512), self.trainable, name='conv_mobj_branch')
-        conv_mbbox = common.convolutional(conv_mobj_branch, (1, 1, 512, 3 * (self.num_class + 5)),
+        conv_mobj_branch = common.convolutional(input_data, (3, 3, 256, 512),  self.trainable, name='conv_mobj_branch' )
+        conv_mbbox = common.convolutional(conv_mobj_branch, (1, 1, 512, 3*(self.num_class + 5)),
                                           trainable=self.trainable, name='conv_mbbox', activate=False, bn=False)
 
         input_data = common.convolutional(input_data, (1, 1, 256, 128), self.trainable, 'conv63')
         input_data = common.upsample(input_data, name='upsample1', method=self.upsample_method)
 
         with tf.variable_scope('route_2'):
-            input_data = tf.concat([input_data, self.route_1], axis=-1)
+            input_data = tf.concat([input_data, route_1], axis=-1)
 
         input_data = common.convolutional(input_data, (1, 1, 384, 128), self.trainable, 'conv64')
         # input_data = common.convolutional(input_data, (3, 3, 128, 256), self.trainable, 'conv65')
@@ -89,9 +80,10 @@ class YOLOV3(object):
         # input_data = common.convolutional(input_data, (1, 1, 256, 128), self.trainable, 'conv68')
 
         conv_sobj_branch = common.convolutional(input_data, (3, 3, 128, 256), self.trainable, name='conv_sobj_branch')
-        conv_sbbox = common.convolutional(conv_sobj_branch, (1, 1, 256, 3 * (self.num_class + 5)),
+        conv_sbbox = common.convolutional(conv_sobj_branch, (1, 1, 256, 3*(self.num_class + 5)),
                                           trainable=self.trainable, name='conv_sbbox', activate=False, bn=False)
-        return conv_lbbox, conv_mbbox, conv_sbbox, out
+
+        return conv_lbbox, conv_mbbox, conv_sbbox
 
     def decode(self, conv_output, anchors, stride):
         """
@@ -99,18 +91,17 @@ class YOLOV3(object):
                contains (x, y, w, h, score, probability)
         """
 
-        conv_shape = tf.shape(conv_output)
-        batch_size = conv_shape[0]
-        output_size = conv_shape[1]
+        conv_shape       = tf.shape(conv_output)
+        batch_size       = conv_shape[0]
+        output_size      = conv_shape[1]
         anchor_per_scale = len(anchors)
 
-        conv_output = tf.reshape(conv_output,
-                                 (batch_size, output_size, output_size, anchor_per_scale, 5 + self.num_class))
+        conv_output = tf.reshape(conv_output, (batch_size, output_size, output_size, anchor_per_scale, 5 + self.num_class))
 
         conv_raw_dxdy = conv_output[:, :, :, :, 0:2]
         conv_raw_dwdh = conv_output[:, :, :, :, 2:4]
         conv_raw_conf = conv_output[:, :, :, :, 4:5]
-        conv_raw_prob = conv_output[:, :, :, :, 5:]
+        conv_raw_prob = conv_output[:, :, :, :, 5: ]
 
         y = tf.tile(tf.range(output_size, dtype=tf.int32)[:, tf.newaxis], [1, output_size])
         x = tf.tile(tf.range(output_size, dtype=tf.int32)[tf.newaxis, :], [output_size, 1])
@@ -153,13 +144,14 @@ class YOLOV3(object):
         inter_section = tf.maximum(right_down - left_up, 0.0)
         inter_area = inter_section[..., 0] * inter_section[..., 1]
         union_area = boxes1_area + boxes2_area - inter_area
-        iou = inter_area / tf.maximum(union_area,1e-5)
+        iou = inter_area / (union_area + 1e-6)
+        # added 1e-6 in denominator to avoid generation of inf, which may cause nan loss
 
         enclose_left_up = tf.minimum(boxes1[..., :2], boxes2[..., :2])
         enclose_right_down = tf.maximum(boxes1[..., 2:], boxes2[..., 2:])
         enclose = tf.maximum(enclose_right_down - enclose_left_up, 0.0)
         enclose_area = enclose[..., 0] * enclose[..., 1]
-        giou = iou - 1.0 * (enclose_area - union_area) /tf.maximum(enclose_area,1e-5) 
+        giou = iou - 1.0 * (enclose_area - union_area) / (enclose_area + 1e-6)
 
         return giou
 
@@ -179,39 +171,38 @@ class YOLOV3(object):
         inter_section = tf.maximum(right_down - left_up, 0.0)
         inter_area = inter_section[..., 0] * inter_section[..., 1]
         union_area = boxes1_area + boxes2_area - inter_area
-        iou = 1.0 * inter_area / tf.maximum(union_area,1e-5)
+        iou = 1.0 * inter_area / union_area
 
         return iou
 
     def loss_layer(self, conv, pred, label, bboxes, anchors, stride):
 
-        conv_shape = tf.shape(conv)
-        batch_size = conv_shape[0]
+        conv_shape  = tf.shape(conv)
+        batch_size  = conv_shape[0]
         output_size = conv_shape[1]
-        input_size = stride * output_size
+        input_size  = stride * output_size
         conv = tf.reshape(conv, (batch_size, output_size, output_size,
                                  self.anchor_per_scale, 5 + self.num_class))
         conv_raw_conf = conv[:, :, :, :, 4:5]
         conv_raw_prob = conv[:, :, :, :, 5:]
 
-        pred_xywh = pred[:, :, :, :, 0:4]
-        pred_conf = pred[:, :, :, :, 4:5]
+        pred_xywh     = pred[:, :, :, :, 0:4]
+        pred_conf     = pred[:, :, :, :, 4:5]
 
-        label_xywh = label[:, :, :, :, 0:4]
-        respond_bbox = label[:, :, :, :, 4:5]
-        label_prob = label[:, :, :, :, 5:]
+        label_xywh    = label[:, :, :, :, 0:4]
+        respond_bbox  = label[:, :, :, :, 4:5]
+        label_prob    = label[:, :, :, :, 5:]
 
-        self.giou = tf.expand_dims(self.bbox_giou(pred_xywh, label_xywh), axis=-1)
+        giou = tf.expand_dims(self.bbox_giou(pred_xywh, label_xywh), axis=-1)
         input_size = tf.cast(input_size, tf.float32)
 
-        self.bbox_loss_scale = 2.0 - 1.0 * label_xywh[:, :, :, :, 2:3] * label_xywh[:, :, :, :, 3:4] / (input_size ** 2)
-
-        giou_loss = respond_bbox * self.bbox_loss_scale * (1 - self.giou)
+        bbox_loss_scale = 2.0 - 1.0 * label_xywh[:, :, :, :, 2:3] * label_xywh[:, :, :, :, 3:4] / (input_size ** 2)
+        giou_loss = respond_bbox * bbox_loss_scale * (1- giou)
 
         iou = self.bbox_iou(pred_xywh[:, :, :, :, np.newaxis, :], bboxes[:, np.newaxis, np.newaxis, np.newaxis, :, :])
         max_iou = tf.expand_dims(tf.reduce_max(iou, axis=-1), axis=-1)
 
-        respond_bgd = (1.0 - respond_bbox) * tf.cast(max_iou < self.iou_loss_thresh, tf.float32)
+        respond_bgd = (1.0 - respond_bbox) * tf.cast( max_iou < self.iou_loss_thresh, tf.float32 )
 
         conf_focal = self.focal(respond_bbox, pred_conf)
 
@@ -223,27 +214,27 @@ class YOLOV3(object):
 
         prob_loss = respond_bbox * tf.nn.sigmoid_cross_entropy_with_logits(labels=label_prob, logits=conv_raw_prob)
 
-        giou_loss = tf.reduce_mean(tf.reduce_sum(giou_loss, axis=[1, 2, 3, 4]))
-        # giou_loss = tf.reduce_mean(tf.reduce_sum(bbox_loss_scale, axis=[1, 2, 3, 4]))
-        conf_loss = tf.reduce_mean(tf.reduce_sum(conf_loss, axis=[1, 2, 3, 4]))
-        prob_loss = tf.reduce_mean(tf.reduce_sum(prob_loss, axis=[1, 2, 3, 4]))
+        giou_loss = tf.reduce_mean(tf.reduce_sum(giou_loss, axis=[1,2,3,4]))
+        conf_loss = tf.reduce_mean(tf.reduce_sum(conf_loss, axis=[1,2,3,4]))
+        prob_loss = tf.reduce_mean(tf.reduce_sum(prob_loss, axis=[1,2,3,4]))
 
-        return giou_loss, conf_loss, prob_loss, tf.reduce_sum(self.giou, axis=[1, 2, 3, 4]), tf.reduce_sum(
-            self.bbox_loss_scale)
+        return giou_loss, conf_loss, prob_loss
+
+
 
     def compute_loss(self, label_sbbox, label_mbbox, label_lbbox, true_sbbox, true_mbbox, true_lbbox):
 
         with tf.name_scope('smaller_box_loss'):
             loss_sbbox = self.loss_layer(self.conv_sbbox, self.pred_sbbox, label_sbbox, true_sbbox,
-                                         anchors=self.anchors[0], stride=self.strides[0])
+                                         anchors = self.anchors[0], stride = self.strides[0])
 
         with tf.name_scope('medium_box_loss'):
             loss_mbbox = self.loss_layer(self.conv_mbbox, self.pred_mbbox, label_mbbox, true_mbbox,
-                                         anchors=self.anchors[1], stride=self.strides[1])
+                                         anchors = self.anchors[1], stride = self.strides[1])
 
         with tf.name_scope('bigger_box_loss'):
             loss_lbbox = self.loss_layer(self.conv_lbbox, self.pred_lbbox, label_lbbox, true_lbbox,
-                                         anchors=self.anchors[2], stride=self.strides[2])
+                                         anchors = self.anchors[2], stride = self.strides[2])
 
         with tf.name_scope('giou_loss'):
             giou_loss = loss_sbbox[0] + loss_mbbox[0] + loss_lbbox[0]
@@ -254,16 +245,4 @@ class YOLOV3(object):
         with tf.name_scope('prob_loss'):
             prob_loss = loss_sbbox[2] + loss_mbbox[2] + loss_lbbox[2]
 
-        with tf.name_scope('giou'):
-            giou = loss_sbbox[3]
-        with tf.name_scope('bbox_loss_scale'):
-            bbox_loss_scale = loss_sbbox[4]
-
-        return giou_loss, conf_loss, prob_loss, giou, bbox_loss_scale
-
-    def layer_loss(self, layer_label):
-        layer_label = tf.cast(layer_label, tf.int32)
-        # Y = tf.one_hot(layer_label, depth=self.layer_nums, axis=1, dtype=tf.float32)
-        cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=layer_label, logits=self.out), name='layer_loss')
-        # cost=tf.losses.mean_squared_error(labels=layer_label,predictions=self.predict_op)
-        return cost
+        return giou_loss, conf_loss, prob_loss

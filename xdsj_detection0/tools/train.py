@@ -9,7 +9,7 @@ from xdsj_detection.yolo.utils.process_config import process_config
 
 parser = OptionParser()
 parser.add_option("-c", "--conf", dest="configure",
-                  default="E:/JY_detection/xdsj_detection(bai)/conf/train.cfg",
+                  default="E:/JY_detection/xdsj_detection0/conf/train.cfg",
                   help="configure filename")
 (options, args) = parser.parse_args()
 if options.configure:
