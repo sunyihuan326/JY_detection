@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2021/7/2
 # @Author  : sunyihuan
-# @File    : pb_predict.py
+# @File    : pb_and_savedmodel_predict.py
 
 import cv2
 import os
 import shutil
 from tqdm import tqdm
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import xdsj_detection.core.utils as utils
 from xdsj_detection.core.config import cfg
 

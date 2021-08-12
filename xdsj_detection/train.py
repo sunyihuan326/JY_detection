@@ -7,7 +7,7 @@ import time
 import shutil
 import numpy as np
 from tensorflow.python.framework import graph_util
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import xdsj_detection.core.utils as utils
 from tqdm import tqdm
 from xdsj_detection.core.dataset import Dataset
