@@ -99,6 +99,7 @@ class YoloTrain(object):
                     with tf.control_dependencies([moving_ave]):
                         self.train_op_with_all_variables = tf.no_op()
         restore_include = ["darknet"]
+
         with tf.name_scope('loader_and_saver'):
             # variables = slim.get_variables_to_restore()
             # variables_to_resotre = [v for v in variables if
