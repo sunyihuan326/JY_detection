@@ -2,7 +2,7 @@
 
 """
 预测一张图片结果
-@File    : ckpt_predict.py
+@File    : ckpt_predict_camera.py
 @Time    : 2019/8/19 15:45
 @Author  : sunyihuan
 """

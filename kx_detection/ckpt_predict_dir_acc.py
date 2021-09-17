@@ -4,7 +4,7 @@
 预测一个根文件下所有文件夹结果
 并打印准确率
 
-@File    : ckpt_predict.py
+@File    : ckpt_predict_camera.py
 @Time    : 2020/7/13 11:28
 @Author  : sunyihuan
 

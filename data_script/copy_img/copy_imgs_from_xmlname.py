@@ -49,8 +49,10 @@ class copy_img(object):
 
 
 if __name__ == "__main__":
-    xml_dir = "F:/model_data/XDSJ/2020_data_bai/train/JoyRobot_1/Annotations_new"
-    img_orginal_dir = "F:/model_data/XDSJ/2020_data_bai/train/JoyRobot_1/JPEGImages"
-    img_copy_dir = "F:/model_data/XDSJ/2020_data_bai/train/JoyRobot_1/JPEGImages_classes"
+    xml_dir = "F:/model_data/XDSJ/2020_data_bai/Annotations"
+    img_orginal_dir = "F:/model_data/XDSJ/2020_data_bai/JPGImages"
+    img_copy_dir = "F:/model_data/XDSJ/2020_data_bai/JPGImages_classes"
+    if not os.path.exists(img_copy_dir): os.mkdir(img_copy_dir)
+
     ci = copy_img(xml_dir, img_orginal_dir, img_copy_dir)
     ci.copy_imgs()

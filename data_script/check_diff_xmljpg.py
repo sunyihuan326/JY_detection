@@ -66,8 +66,8 @@ def check_layerjpg_diff(img_dir, layer_dir):
 
 
 if __name__ == "__main__":
-    img_dir = "E:/已标数据备份/X新模组数据/X/JPGImages"
-    xml_dir = "E:/已标数据备份/X新模组数据/X/Annotations"
-    layer_dir = "E:/已标数据备份/X新模组数据/X/layer_data"
+    img_dir = "F:/robots_images_202107/已标注/use"
+    xml_dir = "F:/robots_images_202107/已标注/use_annotations"
+    # layer_dir = "E:/已标数据备份/X新模组数据/X/layer_data"
     check_xmljpg_diff(img_dir, xml_dir)
-    check_layerjpg_diff(img_dir, layer_dir)
+    # check_layerjpg_diff(img_dir, layer_dir)

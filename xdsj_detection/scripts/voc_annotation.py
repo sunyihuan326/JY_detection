@@ -70,9 +70,9 @@ if __name__ == '__main__':
     if os.path.exists(flags.test_annotation): os.remove(flags.test_annotation)
     # if os.path.exists(flags.val_annotation): os.remove(flags.val_annotation)
     # # #
-    num1 = convert_voc_annotation(flags.data_path, 'train',
+    num1 = convert_voc_annotation(flags.data_path, 'train_8',
                                   flags.train_annotation, False)
-    num2 = convert_voc_annotation(flags.data_path, 'test',
+    num2 = convert_voc_annotation(flags.data_path, 'test_8',
                                   flags.test_annotation, False)
     # num3 = convert_voc_annotation(flags.data_path, 'val',
     #                               flags.val_annotation, False)

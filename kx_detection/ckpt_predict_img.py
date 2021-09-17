@@ -3,7 +3,7 @@
 """
 查看分类前的特征图
 
-@File    : ckpt_predict.py
+@File    : ckpt_predict_camera.py
 @Time    : 2019/8/19 15:45
 @Author  : sunyihuan
 """

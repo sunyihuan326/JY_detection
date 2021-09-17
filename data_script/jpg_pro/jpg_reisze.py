@@ -19,12 +19,13 @@ def resize_dir(jpg_dir, target_size, save_dir):
 
 
 if __name__ == "__main__":
-    img_root = "F:/Test_set/ZG/testset"
-    target_size = (800, 600)
-    save_root = "F:/Test_set/ZG/testset_800"
+    img_root = "F:/robots_images_202107/saved_pictures"
+    target_size = (1280, 720)
+    save_root = "F:/robots_images_202107/saved_pictures_1280"
     if not os.path.exists(save_root): os.mkdir(save_root)
-    for img_d in tqdm(os.listdir(img_root)):
-        jpg_dir = img_root + "/" + img_d
-        save_dir = save_root + "/" + img_d
-        if not os.path.exists(save_dir): os.mkdir(save_dir)
-        resize_dir(jpg_dir, target_size, save_dir)
+    resize_dir(img_root, target_size, save_root)
+    # for img_d in tqdm(os.listdir(img_root)):
+    #     jpg_dir = img_root + "/" + img_d
+    #     save_dir = save_root + "/" + img_d
+    #     if not os.path.exists(save_dir): os.mkdir(save_dir)
+    #     resize_dir(jpg_dir, target_size, save_dir)

@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
 
 """
-预测一张图片结果
-@File    : ckpt_predict.py
-@Time    : 2020/12/08 15:45
+预测一个文件夹图片结果
+@File    : ckpt_predict_camera.py
+@Time    : 2019/12/16 15:45
 @Author  : sunyihuan
 """
 
@@ -11,7 +11,14 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import xdsj_detection.core.utils as utils
-from xdsj_detection.core.config import cfg
+import os
+import time
+import shutil
+from tqdm import tqdm
+
+# gpu限制
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.4
 
 
 class YoloPredict(object):
@@ -21,32 +28,42 @@ class YoloPredict(object):
 
     def __init__(self):
         self.input_size = 416  # 输入图片尺寸（默认正方形）
-        self.classes = utils.read_class_names(cfg.YOLO.CLASSES)
-        self.num_classes = len(self.classes)
-        # self.num_classes = 13
-        self.score_threshold = 0.5
-        self.iou_threshold = 0.4
-        self.weight_file = "E:\\JY_detection\\xdsj_detection\\checkpoint\\yolov3_test_loss=0.8410.ckpt-60"  # ckpt文件地址
+        self.num_classes = 8  # 种类数
+        self.score_cls_threshold = 0.001
+        self.score_threshold = 0.45
+        self.iou_threshold = 0.5
+        self.top_n = 5
+        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=2.7978.ckpt-60"  # ckpt文件地址
+        # self.weight_file = "./checkpoint/yolov3_train_loss=4.7681.ckpt-80"
         self.write_image = True  # 是否画图
         self.show_label = True  # 是否显示标签
 
         graph = tf.Graph()
         with graph.as_default():
+            # 模型加载
             self.saver = tf.train.import_meta_graph("{}.meta".format(self.weight_file))
-            self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+            self.sess = tf.Session(config=config)
             self.saver.restore(self.sess, self.weight_file)
 
+            # 输入
             self.input = graph.get_tensor_by_name("define_input/input_data:0")
             self.trainable = graph.get_tensor_by_name("define_input/training:0")
 
+            # 输出检测结果
             self.pred_sbbox = graph.get_tensor_by_name("define_loss/pred_sbbox/concat_2:0")
             self.pred_mbbox = graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
             self.pred_lbbox = graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
 
     def predict(self, image):
+        '''
+        预测结果
+        :param image: 图片数据，shape为[800,600,3]
+        :return:
+            bboxes：食材检测预测框结果，格式为：[x_min, y_min, x_max, y_max, probability, cls_id],
+            layer_n[0]：烤层检测结果，0：最下层、1：中间层、2：最上层、3：其他
+        '''
         org_image = np.copy(image)
         org_h, org_w, _ = org_image.shape
-        print(org_h, org_w)
 
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
         image_data = image_data[np.newaxis, ...]
@@ -62,31 +79,48 @@ class YoloPredict(object):
         pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),
                                     np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
                                     np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
-
         bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, self.score_threshold)
         bboxes = utils.nms(bboxes, self.iou_threshold)
 
         return bboxes
 
-    def result(self, image_path):
+    def result(self, image_path, save_dir):
+        '''
+        得出预测结果并保存
+        :param image_path: 图片地址
+        :param save_dir: 预测结果原图标注框，保存地址
+        :return:
+        '''
         image = cv2.imread(image_path)  # 图片读取
+        # image = utils.white_balance(image)  # 图片白平衡处理
         bboxes_pr = self.predict(image)  # 预测结果
-        print(bboxes_pr)
+
         if self.write_image:
             image = utils.draw_bbox(image, bboxes_pr, show_label=self.show_label)
             drawed_img_save_to_path = str(image_path).split("/")[-1]
-            cv2.imwrite(drawed_img_save_to_path, image)
+            drawed_img_save_to_path = str(drawed_img_save_to_path).split(".")[0] + ".jpg"
+            # cv2.imshow('Detection result', image)
+            cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)  # 保存图片
+        return bboxes_pr
 
 
 if __name__ == '__main__':
-    import time
-
     start_time = time.time()
-    img_path = "F:/model_data/XDSJ/2020_data_bai/JPGImages/13502050.jpg"  # 图片地址
+
+    img_dir = "F:/robots_images_202107/saved_pictures"  # 图片文件地址
+
+    save_dir = "F:/robots_images_202107/saved_pictures_detection_60"
+    if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YoloPredict()
     end_time0 = time.time()
-
     print("model loading time:", end_time0 - start_time)
-    Y.result(img_path)
+
+    for img in tqdm(os.listdir(img_dir)):
+        if img.endswith("jpg"):
+            img_path = img_dir + "/" + img
+            end_time1 = time.time()
+            bboxes_p = Y.result(img_path, save_dir)
+            print(bboxes_p)
+
     end_time1 = time.time()
-    print("predict time:", end_time1 - end_time0)
+    print("all data time:", end_time1 - end_time0)

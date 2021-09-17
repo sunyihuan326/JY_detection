@@ -2,7 +2,7 @@
 
 """
 预测一个文件夹图片结果
-@File    : ckpt_predict.py
+@File    : ckpt_predict_camera.py
 @Time    : 2019/12/16 15:45
 @Author  : sunyihuan
 """

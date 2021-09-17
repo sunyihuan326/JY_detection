@@ -6,9 +6,9 @@ import shutil
 from tqdm import tqdm
 import numpy as np
 import tensorflow as tf
-import multi_detection.core.utils as utils
-from multi_detection.core.config import cfg
-from multi_detection.core.yolov3 import YOLOV3
+import kx_detection.core.utils as utils
+from kx_detection.core.config import cfg
+from kx_detection.core.yolov3 import YOLOV3
 import matplotlib.pyplot as plt
 from PIL import Image
 
@@ -30,10 +30,10 @@ class YoloTest(object):
         self.show_label = cfg.TEST.SHOW_LABEL
 
         with tf.name_scope('input'):
-            self.input_data = tf.placeholder(dtype=tf.float32, name='input_data')
-            self.trainable = tf.placeholder(dtype=tf.bool, name='trainable')
+            self.input_data = tf.placeholder(dtype=tf.float32, shape=(None, 416, 416, 3), name='input_data')
+            # self.trainable = tf.placeholder(dtype=tf.bool, name='trainable')
 
-        model = YOLOV3(self.input_data, self.trainable)
+        model = YOLOV3(self.input_data)
         self.pred_sbbox, self.pred_mbbox, self.pred_lbbox = model.pred_sbbox, model.pred_mbbox, model.pred_lbbox
         #
         # with tf.name_scope('ema'):
@@ -57,7 +57,7 @@ class YoloTest(object):
             [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
             feed_dict={
                 self.input_data: image_data,
-                self.trainable: False
+                # self.trainable: False
             }
         )
 

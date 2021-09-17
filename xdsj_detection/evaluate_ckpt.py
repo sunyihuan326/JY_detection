@@ -17,7 +17,7 @@ from xdsj_detection.core.config import cfg
 class YoloTest(object):
     def __init__(self):
         self.input_size = cfg.TEST.INPUT_SIZE
-        print("self.input_size ",self.input_size )
+        print("self.input_size ", self.input_size)
         self.anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE
         self.classes = utils.read_class_names(cfg.YOLO.CLASSES)
         self.num_classes = len(self.classes)
@@ -26,7 +26,7 @@ class YoloTest(object):
         self.iou_threshold = cfg.TEST.IOU_THRESHOLD
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
         self.annotation_path = cfg.TEST.ANNOT_PATH
-        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.6583.ckpt-23"
+        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.8277.ckpt-60"
         self.write_image = cfg.TEST.WRITE_IMAGE
         self.write_image_path = cfg.TEST.WRITE_IMAGE_PATH
         self.show_label = cfg.TEST.SHOW_LABEL
@@ -40,6 +40,7 @@ class YoloTest(object):
             self.input = graph.get_tensor_by_name("define_input/input_data:0")
             self.trainable = graph.get_tensor_by_name("define_input/training:0")
 
+            self.pred_sbbox = graph.get_tensor_by_name("define_loss/pred_sbbox/concat_2:0")
             self.pred_mbbox = graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
             self.pred_lbbox = graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
 
@@ -50,15 +51,16 @@ class YoloTest(object):
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
         image_data = image_data[np.newaxis, ...]
 
-        pred_mbbox, pred_lbbox= self.sess.run(
-            [self.pred_mbbox, self.pred_lbbox],
+        pred_sbbox, pred_mbbox, pred_lbbox = self.sess.run(
+            [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
             feed_dict={
                 self.input: image_data,
                 self.trainable: False
             }
         )
 
-        pred_bbox = np.concatenate([np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
+        pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),
+                                    np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
                                     np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
 
         bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, 0.45)

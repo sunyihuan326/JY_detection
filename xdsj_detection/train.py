@@ -7,7 +7,7 @@ import time
 import shutil
 import numpy as np
 from tensorflow.python.framework import graph_util
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import xdsj_detection.core.utils as utils
 from tqdm import tqdm
 from xdsj_detection.core.dataset import Dataset
@@ -100,10 +100,10 @@ class YoloTrain(object):
                         self.train_op_with_all_variables = tf.no_op()
         restore_include = ["darknet"]
         with tf.name_scope('loader_and_saver'):
-            variables = tf.contrib.framework.get_variables_to_restore()
-            variables_to_resotre = [v for v in variables if
-                                    v.name.split('/')[0] not in ['conv_sbbox', 'conv_mbbox', 'conv_lbbox']]
-            print(variables_to_resotre)
+            # variables = slim.get_variables_to_restore()
+            # variables_to_resotre = [v for v in variables if
+            #                         v.name.split('/')[0] not in ['conv_sbbox', 'conv_mbbox', 'conv_lbbox']]
+            # print(variables_to_resotre)
             # self.loader = tf.train.Saver(variables_to_resotre)  # 仅加载部分参数
             self.loader = tf.train.Saver(self.net_var)
             self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=10)
@@ -187,4 +187,5 @@ class YoloTrain(object):
             #     f.write(constant_graph.SerializeToString())
 
 
-if __name__ == '__main__': YoloTrain().train()
+if __name__ == '__main__':
+    YoloTrain().train()
