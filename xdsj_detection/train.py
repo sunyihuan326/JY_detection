@@ -6,8 +6,10 @@ import os
 import time
 import shutil
 import numpy as np
-from tensorflow.python.framework import graph_util
+# from tensorflow.python.framework import graph_util
 import tensorflow as tf
+print(tf.test.is_gpu_available())
+
 import xdsj_detection.core.utils as utils
 from tqdm import tqdm
 from xdsj_detection.core.dataset import Dataset
@@ -99,7 +101,6 @@ class YoloTrain(object):
                     with tf.control_dependencies([moving_ave]):
                         self.train_op_with_all_variables = tf.no_op()
         restore_include = ["darknet"]
-
         with tf.name_scope('loader_and_saver'):
             # variables = slim.get_variables_to_restore()
             # variables_to_resotre = [v for v in variables if

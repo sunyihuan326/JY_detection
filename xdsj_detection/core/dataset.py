@@ -68,7 +68,7 @@ class Dataset(object):
                     index = self.batch_count * self.batch_size + num
                     if index >= self.num_samples: index -= self.num_samples
                     annotation = self.annotations[index]
-                    image, bboxes = self.parse_annotation(annotation)
+                    image, bboxes = self.parse_annotation(annotation)  # 图片和标签框均处理为input尺寸的正方形
                     label_sbbox, label_mbbox, label_lbbox, sbboxes, mbboxes, lbboxes = self.preprocess_true_boxes(
                         bboxes)
 
@@ -191,6 +191,7 @@ class Dataset(object):
 
         for bbox in bboxes:
             bbox_coor = bbox[:4]
+            # print("bbox_coor::::", bbox_coor)
             bbox_class_ind = bbox[4]
 
             onehot = np.zeros(self.num_classes, dtype=np.float)
@@ -199,9 +200,11 @@ class Dataset(object):
             deta = 0.01
             smooth_onehot = onehot * (1 - deta) + deta * uniform_distribution
 
+            # x=(x_min+x_max)/2,y=(y_min+y_max)/2,w=x_max-x_min,h=y_max-y_min
             bbox_xywh = np.concatenate([(bbox_coor[2:] + bbox_coor[:2]) * 0.5, bbox_coor[2:] - bbox_coor[:2]], axis=-1)
+            # bbox_xywh除以对应的strides，生成[bbox_xywh/8,bbox_xywh/16,bbox_xywh/32]
             bbox_xywh_scaled = 1.0 * bbox_xywh[np.newaxis, :] / self.strides[:, np.newaxis]
-
+            # print("bbox_xywh_scaled:::::::",bbox_xywh_scaled)
             iou = []
             exist_positive = False
             for i in range(3):

@@ -34,6 +34,10 @@ def get_bboxes(xml_dir):
 
 
 if __name__ == "__main__":
-    xml_dir = "F:/robots_images_202107/已标注/use_annotations"
+    xml_dir = "F:/model_data/XDSJ/test_annotations"
     labels_nums = get_bboxes(xml_dir)
+    s = 0
+    for k in labels_nums.keys():
+        s += labels_nums[k]
     print(labels_nums)
+    print("总数：：：：", s)

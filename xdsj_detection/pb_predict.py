@@ -17,7 +17,6 @@ class YPredict(object):
     '''
     预测结果
     '''
-
     def __init__(self):
         self.input_size = cfg.TEST.INPUT_SIZE
         self.anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE

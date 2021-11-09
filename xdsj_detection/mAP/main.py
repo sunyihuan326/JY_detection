@@ -351,10 +351,11 @@ for txt_file in ground_truth_files_list:
             continue
         bbox = left + " " + top + " " + right + " " + bottom
         if is_difficult:
-            bounding_boxes.append({"class_name": class_name, "bbox": bbox, "used": False, "difficult": True})
+            bounding_boxes.append(
+                {"class_name": class_name, "bbox": bbox, "used": False, "file_id": file_id, "difficult": True})
             is_difficult = False
         else:
-            bounding_boxes.append({"class_name": class_name, "bbox": bbox, "used": False})
+            bounding_boxes.append({"class_name": class_name, "bbox": bbox, "used": False, "file_id": file_id})
             # count that object
             if class_name in gt_counter_per_class:
                 gt_counter_per_class[class_name] += 1
@@ -440,11 +441,18 @@ for class_index, class_name in enumerate(gt_classes):
 """
 sum_AP = 0.0
 ap_dictionary = {}
+
+error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-40"
+if not os.path.exists(error_detect_imgs):os.mkdir(error_detect_imgs)
 # open file to store the results
 with open(results_files_path + "/results.txt", 'w') as results_file:
     results_file.write("# AP and precision/recall per class\n")
     count_true_positives = {}
     for class_index, class_name in enumerate(gt_classes):
+
+        error_dir = error_detect_imgs + "/" + class_name
+        if not os.path.exists(error_dir): os.mkdir(error_dir)
+
         count_true_positives[class_name] = 0
         """
          Load predictions of that class
@@ -456,6 +464,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
          Assign predictions to ground truth objects
         """
         nd = len(predictions_data)
+        print("nd::::::::::::::", nd)
         tp = [0] * nd  # creates an array of zeros of size nd
         fp = [0] * nd
         for idx, prediction in enumerate(predictions_data):
@@ -486,6 +495,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
             #   open ground-truth with that file_id
             gt_file = tmp_files_path + "/" + file_id + "_ground_truth.json"
             ground_truth_data = json.load(open(gt_file))
+            # print("ground_truth_data***********************", ground_truth_data)
             ovmax = -1
             gt_match = -1
             # load prediction bounding-box
@@ -532,11 +542,23 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
                         fp[idx] = 1
                         if show_animation:
                             status = "REPEATED MATCH!"
+
+                        if not os.path.exists(error_dir + "/high_iou"): os.mkdir(error_dir + "/high_iou")
+                        # 拷贝图片
+                        print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
+                        shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
+                                    error_dir + "/high_iou" + "/" + file_id + ".jpg")
             else:
                 # false positive
                 fp[idx] = 1
                 if ovmax > 0:
                     status = "INSUFFICIENT OVERLAP"
+
+                # 拷贝图片
+                if not os.path.exists(error_dir + "/low_iou"): os.mkdir(error_dir + "/low_iou")
+                print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
+                shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
+                            error_dir + "/low_iou" + "/" + file_id + ".jpg")
 
             """
              Draw image to show animation
@@ -596,7 +618,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
                 # save the image with all the objects drawn to it
                 cv2.imwrite(img_cumulative_path, img_cumulative)
 
-        # print(tp)
+        # print("tp::::::::::::::::::::::::::::::",tp)
         # compute precision/recall
         cumsum = 0
         for idx, val in enumerate(fp):
@@ -606,7 +628,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
         for idx, val in enumerate(tp):
             tp[idx] += cumsum
             cumsum += val
-        # print(tp)
+        # print("tp::::::::::::::::::::::::::::::",tp)
         rec = tp[:]
         for idx, val in enumerate(tp):
             rec[idx] = float(tp[idx]) / gt_counter_per_class[class_name]
@@ -670,8 +692,40 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
     results_file.write(text + "\n")
     print(text)
 
+r_nums = 0
+error_nums = 0
+for j in os.listdir(tmp_files_path):
+    if "cup" not in j and "carpet" not in j and "dishcloth" not in j and "dustbin" not in j and "line" not in j and "shoes" not in j and "socks" not in j:
+        j_file = tmp_files_path + "/" + j
+        ground_truth_data = json.load(open(j_file))
+        for o in ground_truth_data:
+            if bool(o["used"]):
+                r_nums += 1
+            else:
+                error_nums += 1
+                class_name0 = o["class_name"]
+                file_id = o["file_id"]
+
+                # 拷贝图片
+                error_dir = error_detect_imgs + "/" + class_name0
+                if not os.path.exists(error_dir): os.mkdir(error_dir)
+                if not os.path.exists(error_dir + "/nobboxes"): os.mkdir(error_dir + "/nobboxes")
+                writes_img_list = []
+                if os.path.exists(error_dir + "/high_iou"):
+                    for f in os.listdir(error_dir + "/high_iou"):
+                        writes_img_list.append(f)
+                if os.path.exists(error_dir + "/low_iou"):
+                    for f in os.listdir(error_dir + "/low_iou"):
+                        writes_img_list.append(f)
+                if file_id + ".jpg" not in writes_img_list:
+                    # print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
+                    shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
+                                error_dir + "/nobboxes" + "/" + file_id + ".jpg")
+
+print("r_nums:", r_nums, "    error_nums:", error_nums)
+
 # remove the tmp_files directory
-shutil.rmtree(tmp_files_path)
+# shutil.rmtree(tmp_files_path)
 
 """
  Count total of Predictions

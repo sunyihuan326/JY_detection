@@ -76,3 +76,30 @@ def upsample(input_data, name, method="deconv"):
                                             strides=(2,2), kernel_initializer=tf.random_normal_initializer())
 
     return output
+
+def cspstage(input_data, trainable, filters, loop, layer_nums, route_nums, res_nums):
+        '''CSPNets stage
+            param input_data: The input tensor
+            param trainable: A bool parameter, True ==> training, False ==> not train.
+            param filters: Filter nums
+            param loop: ResBlock loop nums
+            param layer_nums: Counter of Conv layers
+            param route_nums: Counter of route nums
+            param res_nums: Counter of ResBlock nums
+        return: Output tensors and the last Conv layer counter of this stage'''
+        c = filters
+        out_layer = layer_nums + 1 + loop + 1
+        route = input_data
+        route = convolutional(route, (1, 1, c, int(c / 2)), trainable=trainable, name='conv_route%d' % route_nums,
+                     activate=True)
+        input_data = convolutional(input_data, (1, 1, c, int(c / 2)), trainable=trainable, name='conv%d' % (layer_nums + 1),
+                          activate=True)
+
+        for i in range(loop):
+            input_data = residual_block(input_data, int(c / 2), int(c / 2), int(c / 2), trainable=trainable,
+                                   name='residual%d' % (i + res_nums))
+
+        input_data = convolutional(input_data, (1, 1, int(c / 2), int(c / 2)), trainable=trainable, name='conv%d' % out_layer,
+                          activate=True)
+        input_data = tf.concat([input_data, route], axis=-1)
+        return input_data, out_layer
