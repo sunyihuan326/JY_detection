@@ -9,21 +9,21 @@ ckpt文件转成pb文件
 """
 
 import tensorflow as tf
-from xdsj_detection.core.yolov3_tiny import YOLOV3
+from xdsj_detection.core.yolov3_gai import YOLOV3
 
-typ = "tiny"
+typ = "yolov3"
 
-pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_tiny.pb"
-ckpt_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_train_loss=5.4919.ckpt-60"
+pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_1207.pb"
+ckpt_file = "E:/JY_detection/xdsj_detection/checkpoint/padding_resize/mAP8925/yolov3_test_loss=1.7258.ckpt-50"
 
 if typ == "tiny":
     output = ["define_loss/pred_mbbox/concat_2", "define_loss/pred_lbbox/concat_2"]
 else:
     output = ["define_loss/pred_sbbox/concat_2", "define_loss/pred_mbbox/concat_2",
-              "define_loss/pred_lbbox/concat_2", "define_loss/layer_classes"]
+              "define_loss/pred_lbbox/concat_2"]
 
 with tf.name_scope('define_input'):  # 输出
-    input_data = tf.placeholder(dtype=tf.float32, shape=(None, 320, 320, 3), name='input_data')
+    input_data = tf.placeholder(dtype=tf.float32, shape=(None, 416, 416, 3), name='input_data')
     # trainable = tf.placeholder(dtype=tf.bool, name='training')
 
 with tf.name_scope("define_loss"):  # 输出

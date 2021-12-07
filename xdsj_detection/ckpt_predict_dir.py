@@ -33,7 +33,7 @@ class YoloPredict(object):
         self.score_threshold = 0.45
         self.iou_threshold = 0.5
         self.top_n = 5
-        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.5903.ckpt-40"  # ckpt文件地址
+        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.7258.ckpt-50"  # ckpt文件地址
         # self.weight_file = "./checkpoint/yolov3_train_loss=4.7681.ckpt-80"
         self.write_image = True  # 是否画图
         self.show_label = True  # 是否显示标签
@@ -111,9 +111,9 @@ class YoloPredict(object):
 if __name__ == '__main__':
     start_time = time.time()
 
-    img_dir = "F:/robots_images_202107/saved_pictures_1280"  # 图片文件地址
+    img_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280"  # 图片文件地址
 
-    save_dir = "F:/robots_images_202107/saved_pictures_detection_1280_1101_40"
+    save_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280_detection_1207"
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YoloPredict()
     end_time0 = time.time()

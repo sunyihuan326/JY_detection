@@ -11,12 +11,14 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 import xdsj_detection.core.utils as utils
 from xdsj_detection.core.config import cfg
+from xdsj_detection.distance_and_angle import *
 
 
 class YPredict(object):
     '''
     预测结果
     '''
+
     def __init__(self):
         self.input_size = cfg.TEST.INPUT_SIZE
         self.anchor_per_scale = cfg.YOLO.ANCHOR_PER_SCALE
@@ -27,11 +29,11 @@ class YPredict(object):
         self.iou_threshold = cfg.TEST.IOU_THRESHOLD
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
         self.annotation_path = cfg.TEST.ANNOT_PATH
-        self.pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_tiny.pb"
+        self.pb_file = "E:/JY_detection/xdsj_detection/checkpoint/padding_resize/mAP94/yolov3_94.pb"
         self.write_image = cfg.TEST.WRITE_IMAGE
         self.write_image_path = cfg.TEST.WRITE_IMAGE_PATH
         self.show_label = cfg.TEST.SHOW_LABEL
-        self.typ = "tiny"
+        self.typ = "yolov3"
 
         graph = tf.Graph()
         with graph.as_default():
@@ -44,7 +46,7 @@ class YPredict(object):
             self.input = self.sess.graph.get_tensor_by_name("define_input/input_data:0")
 
             # 输出
-            if self.typ=="tiny":
+            if self.typ == "tiny":
                 self.pred_mbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
                 self.pred_lbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
             else:
@@ -55,27 +57,32 @@ class YPredict(object):
     def predict(self, image):
         org_image = np.copy(image)
         org_h, org_w, _ = org_image.shape
-        print(org_h, org_w)
 
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
         image_data = image_data[np.newaxis, ...]
-        if self.typ=="tiny":
+
+        img = cv2.resize(image, (self.input_size, self.input_size), interpolation=cv2.INTER_CUBIC)
+        print(image_data.shape)
+        if self.typ == "tiny":
             pred_mbbox, pred_lbbox = self.sess.run(
                 [self.pred_mbbox, self.pred_lbbox],
                 feed_dict={
                     self.input: image_data,
+                    # self.input: img,
                 }
             )
 
             pred_bbox = np.concatenate([np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
                                         np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
         else:
-            pred_sbbox,pred_mbbox, pred_lbbox = self.sess.run(
-                [self.pred_sbbox,self.pred_mbbox, self.pred_lbbox],
+            pred_sbbox, pred_mbbox, pred_lbbox = self.sess.run(
+                [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
                 feed_dict={
                     self.input: image_data,
+                    # self.input: img,
                 }
             )
+            # print(pred_sbbox.sum())
 
             pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),
                                         np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
@@ -89,22 +96,49 @@ class YPredict(object):
     def result(self, image_path):
         image = cv2.imread(image_path)  # 图片读取
         bboxes_pr = self.predict(image)  # 预测结果
-        print(bboxes_pr)
-        if self.write_image:
-            image = utils.draw_bbox(image, bboxes_pr, show_label=self.show_label)
-            drawed_img_save_to_path = str(image_path).split("/")[-1]
-            cv2.imwrite(drawed_img_save_to_path, image)
+        # print(bboxes_pr)
+        # if self.write_image:
+        #     image = utils.draw_bbox(image, bboxes_pr, show_label=self.show_label)
+        #     drawed_img_save_to_path = str(image_path).split("/")[-1]
+        #     cv2.imwrite(drawed_img_save_to_path, image)
+        return bboxes_pr
 
 
 if __name__ == '__main__':
     import time
 
     start_time = time.time()
-    img_path = "F:/model_data/XDSJ/2020_data_bai/JPGImages/07302050.jpg"  # 图片地址
+
+    img_dir = "C:/Users/sunyihuan/Desktop/t/11"  # 图片文件地址
+
+    save_dir = "C:/Users/sunyihuan/Desktop/t/11_de"
+    if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YPredict()
     end_time0 = time.time()
-
     print("model loading time:", end_time0 - start_time)
-    Y.result(img_path)
+
+    for img in tqdm(os.listdir(img_dir)):
+        if img.endswith("jpg"):
+            img_path = img_dir + "/" + img
+            # print(img)
+            end_time1 = time.time()
+            bboxes_p = Y.result(img_path)
+            if len(bboxes_p) > 0:
+                for b in bboxes_p:
+                    print("distance: ", distance_to_camera(b[1]))
+                    print("angle x0: ", compute_angle(b[0]))
+                    print("angle x1: ", compute_angle(b[2]))
+
     end_time1 = time.time()
-    print("predict time:", end_time1 - end_time0)
+    print("all data time:", end_time1 - end_time0)
+    #
+    #
+    # start_time = time.time()
+    # img_path = "F:/model_data/XDSJ/2020_data_bai/JPGImages/07302050.jpg"  # 图片地址
+    # Y = YPredict()
+    # end_time0 = time.time()
+    #
+    # print("model loading time:", end_time0 - start_time)
+    # Y.result(img_path)
+    # end_time1 = time.time()
+    # print("predict time:", end_time1 - end_time0)

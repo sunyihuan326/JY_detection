@@ -2,6 +2,10 @@
 # @Time    : 2021/8/27
 # @Author  : sunyihuan
 # @File    : split_train_test.py
+'''
+JPGImages和Annotations文件夹下所有数据分train、test
+
+'''
 import os
 import random
 
@@ -53,7 +57,7 @@ def split_data(data_root, test_percent, val_percent):
 
 
 if __name__ == "__main__":
-    data_root = "F:/model_data/XDSJ/2020_data_bai"
+    data_root = "F:/robots_images_202109/20211126use"
     test_percent = 0.2
     val_percent = 0
     split_data(data_root, test_percent, val_percent)

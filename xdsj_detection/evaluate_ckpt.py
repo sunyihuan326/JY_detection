@@ -26,7 +26,7 @@ class YoloTest(object):
         self.iou_threshold = cfg.TEST.IOU_THRESHOLD
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
         self.annotation_path = cfg.TEST.ANNOT_PATH
-        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=2.0075.ckpt-40"
+        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.7258.ckpt-50"
         self.write_image = cfg.TEST.WRITE_IMAGE
         self.write_image_path = cfg.TEST.WRITE_IMAGE_PATH
         self.show_label = cfg.TEST.SHOW_LABEL
@@ -64,9 +64,9 @@ class YoloTest(object):
                                     np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
 
         bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, 0.45)
-        print(bboxes)
+        # print(bboxes)
         bboxes = utils.nms(bboxes, self.iou_threshold)
-        print(bboxes)
+        # print(bboxes)
 
         return bboxes
 

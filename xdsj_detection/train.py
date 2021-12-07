@@ -6,14 +6,14 @@ import os
 import time
 import shutil
 import numpy as np
-# from tensorflow.python.framework import graph_util
+from tensorflow.python.framework import graph_util
 import tensorflow as tf
 print(tf.test.is_gpu_available())
 
 import xdsj_detection.core.utils as utils
 from tqdm import tqdm
 from xdsj_detection.core.dataset import Dataset
-from xdsj_detection.core.yolov3 import YOLOV3
+from xdsj_detection.core.yolov3_gai import YOLOV3
 from xdsj_detection.core.config import cfg
 
 class YoloTrain(object):
@@ -48,7 +48,6 @@ class YoloTrain(object):
             self.true_mbboxes = tf.placeholder(dtype=tf.float32, name='mbboxes')
             self.true_lbboxes = tf.placeholder(dtype=tf.float32, name='lbboxes')
             self.trainable = tf.placeholder(dtype=tf.bool, name='training')
-
         with tf.name_scope("define_loss"):
             self.model = YOLOV3(self.input_data, self.trainable)
             self.net_var = tf.global_variables()
@@ -182,11 +181,11 @@ class YoloTrain(object):
                   % (epoch, log_time, train_epoch_loss, test_epoch_loss, ckpt_file))
             self.saver.save(self.sess, ckpt_file, global_step=epoch)
 
-            # output = ["define_loss/pred_sbbox/concat_2", "define_loss/pred_mbbox/concat_2",
-            #           "define_loss/pred_lbbox/concat_2"]
-            # constant_graph = graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, output)
-            # with tf.gfile.GFile('./model/yolo_model.pb', mode='wb') as f:
-            #     f.write(constant_graph.SerializeToString())
+            output = ["define_loss/pred_sbbox/concat_2", "define_loss/pred_mbbox/concat_2",
+                      "define_loss/pred_lbbox/concat_2"]
+            constant_graph = graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, output)
+            with tf.gfile.GFile('./model/yolo_model.pb', mode='wb') as f:
+                f.write(constant_graph.SerializeToString())
 
 
 if __name__ == '__main__':

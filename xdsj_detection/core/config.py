@@ -22,22 +22,22 @@ __C.YOLO.DEMO_WEIGHT                 = "./yolo3_coco/yolov3_coco.ckpt"
 # Train options
 __C.TRAIN = edict()
 
-__C.TRAIN.ANNOT_PATH                 = "./data/dataset/train8_allnew_aug.txt"
+__C.TRAIN.ANNOT_PATH                 = "./data/dataset/train8_1126.txt"
 __C.TRAIN.BATCH_SIZE                 = 4
 __C.TRAIN.INPUT_SIZE                 = 416
 __C.TRAIN.DATA_AUG                   = True
 __C.TRAIN.LEARN_RATE_INIT            = 1e-4
 __C.TRAIN.LEARN_RATE_END             = 1e-6
 __C.TRAIN.WARMUP_EPOCHS              = 10
-__C.TRAIN.FISRT_STAGE_EPOCHS         = 5
-__C.TRAIN.SECOND_STAGE_EPOCHS        = 35
-# __C.TRAIN.INITIAL_WEIGHT             ="./checkpoint/yolov3_test_loss=30.2904.ckpt-10"
+__C.TRAIN.FISRT_STAGE_EPOCHS         = 10
+__C.TRAIN.SECOND_STAGE_EPOCHS        = 40
+# __C.TRAIN.INITIAL_WEIGHT             ="./checkpoint/padding_resize/mAP94/yolov3_test_loss=1.5903.ckpt-40"
 __C.TRAIN.INITIAL_WEIGHT             = ""
 
 # TEST options
 __C.TEST = edict()
 
-__C.TEST.ANNOT_PATH                  ="./data/dataset/test8_allnew.txt"
+__C.TEST.ANNOT_PATH                  ="./data/dataset/test8_1126.txt"
 __C.TEST.BATCH_SIZE                  = 2
 __C.TEST.INPUT_SIZE                  = 416
 __C.TEST.DATA_AUG                    = False

@@ -442,7 +442,7 @@ for class_index, class_name in enumerate(gt_classes):
 sum_AP = 0.0
 ap_dictionary = {}
 
-error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-40"
+error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-50_1207"
 if not os.path.exists(error_detect_imgs):os.mkdir(error_detect_imgs)
 # open file to store the results
 with open(results_files_path + "/results.txt", 'w') as results_file:

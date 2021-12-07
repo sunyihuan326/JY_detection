@@ -41,7 +41,7 @@ def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=T
                     label_name = obj.find('name').text.lower()
 
                     class_ind = classes.index(label_name.strip())
-                    print(class_ind)
+
                     xmin = bbox.find('xmin').text.strip()
                     xmax = bbox.find('xmax').text.strip()
                     ymin = bbox.find('ymin').text.strip()
@@ -57,11 +57,11 @@ def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=T
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_path",
-                        default="F:/model_data/XDSJ/2020_data_bai")
+                        default="F:/robots_images_202109/20211126use")
     parser.add_argument("--train_annotation",
-                        default="F:/model_data/XDSJ/2020_data_bai/train14.txt")
+                        default="F:/robots_images_202109/20211126use/train8.txt")
     parser.add_argument("--test_annotation",
-                        default="F:/model_data/XDSJ/2020_data_bai/test14.txt")
+                        default="F:/robots_images_202109/20211126use/test8.txt")
     # parser.add_argument("--val_annotation",
     #                     default="E:/DataSets/2020_two_phase_KXData/only2phase_data/val18.txt")
     flags = parser.parse_args()

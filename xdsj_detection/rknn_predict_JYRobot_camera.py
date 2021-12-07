@@ -1,18 +1,19 @@
-# -*- encoding: utf-8 -*-
-
-"""
-预测一张图片结果
-@File    : ckpt_predict_camera.py
-@Time    : 2020/12/08 15:45
-@Author  : sunyihuan
-"""
-
+# -*- coding: utf-8 -*-
+# @Time    : 2021/11/18
+# @Author  : sunyihuan
+# @File    : rknn_predict_JYRobot.py
+print('start import')
+# from rknn.api import RKNN
 import cv2
+import os
 import numpy as np
-import tensorflow as tf
-import xdsj_detection.core.utils as utils
+import utils
+from rknnlite.api import RKNNLite
+import time
 import threading
 import copy
+
+print('import over')
 
 
 class UsbCamCapture:
@@ -22,8 +23,8 @@ class UsbCamCapture:
         self.is_stop = False
         self.capture = cv2.VideoCapture(url)
         if self.capture.isOpened():
-            self.capture.set(3, 1280)
-            self.capture.set(4, 720)
+            self.capture.set(3, 640)
+            self.capture.set(4, 360)
             self.capture.read()
 
     def start(self):
@@ -46,51 +47,45 @@ class UsbCamCapture:
         self.capture.release()
 
 
+INPUT_SIZE = 416
+
 class YoloPredict(object):
     '''
     预测结果
     '''
 
     def __init__(self):
-        self.input_size = 416  # 输入图片尺寸（默认正方形）
+        self.input_size = INPUT_SIZE  # 输入图片尺寸（默认正方形）
         self.num_classes = 8  # 种类数
-        # 类别对应id
-        # 0：dishcloth，1：dustbin，2：line，3：shoes，4：socks，5：None，6：carpet，7：cup
-        self.score_cls_threshold = 0.001
-        self.score_threshold = 0.45
+        self.score_threshold = 0.3
         self.iou_threshold = 0.5
-        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/padding_resize/mAP94/yolov3_test_loss=1.5903.ckpt-40"  # ckpt文件地址
-        self.write_image = True  # 是否画图
-        self.show_label = True  # 是否显示标签
-
-        graph = tf.Graph()
-        with graph.as_default():
-            self.saver = tf.train.import_meta_graph("{}.meta".format(self.weight_file))
-            self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-            self.saver.restore(self.sess, self.weight_file)
-
-            self.input = graph.get_tensor_by_name("define_input/input_data:0")
-            self.trainable = graph.get_tensor_by_name("define_input/training:0")
-
-            self.pred_sbbox = graph.get_tensor_by_name("define_loss/pred_sbbox/concat_2:0")
-            self.pred_mbbox = graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
-            self.pred_lbbox = graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
+        self.RKNN_MODEL_PATH = "./yolov3_JYRobot_94_quantization_i16.rknn"  # pb文件地址
+        self.rknn = RKNNLite()
+        # Direct load rknn model
+        print('Loading RKNN model')
+        time0 = time.time()
+        ret = self.rknn.load_rknn(self.RKNN_MODEL_PATH)
+        time1 = time.time()
+        print("load rknn time:", time1 - time0)
+        ret = self.rknn.init_runtime(target='rv1126', device_id='c3d9b8674f4b94f6')
+        time2 = time.time()
+        print("init run env time:", time2 - time1)
+        if ret != 0:
+            print('load rknn model failed.')
+            exit(ret)
 
     def predict(self, image):
+        img = cv2.resize(image, (INPUT_SIZE, INPUT_SIZE), interpolation=cv2.INTER_CUBIC)
         org_image = np.copy(image)
         org_h, org_w, _ = org_image.shape
-        print(org_h, org_w)
 
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
-        image_data = image_data[np.newaxis, ...]
+        print(type(image_data))
 
-        pred_sbbox, pred_mbbox, pred_lbbox = self.sess.run(
-            [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
-            feed_dict={
-                self.input: image_data,
-                self.trainable: False
-            }
-        )
+        outputs = self.rknn.inference(inputs=[img])
+        pred_sbbox = outputs[0]
+        pred_mbbox = outputs[1]
+        pred_lbbox = outputs[2]
 
         pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),
                                     np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
@@ -98,9 +93,16 @@ class YoloPredict(object):
 
         bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, self.score_threshold)
         bboxes = utils.nms(bboxes, self.iou_threshold)
-        # bboxes格式：[[xmin,ymin,xmax,ymax,score,cls_id]]
 
         return bboxes
+
+    def result(self, image_path):
+        #image = cv2.imread(image_path)  # 图片读取
+        bboxes_pr = self.predict(image_path)
+        print("预测结果：", bboxes_pr)
+        # memory_detail = self.rknn.eval_memory()
+
+        return bboxes_pr
 
 
 if __name__ == '__main__':
@@ -108,7 +110,7 @@ if __name__ == '__main__':
 
     Y = YoloPredict()  # 加载模型
 
-    usb_cam = UsbCamCapture(0)
+    usb_cam = UsbCamCapture(20)
     # 启动子线程
     usb_cam.start()
     # 暂停1秒，确保影像已经填充
@@ -121,7 +123,7 @@ if __name__ == '__main__':
         start_time = time.time()
         end_time0 = time.time()
 
-        bboxes_pr = Y.predict(np_img)  # 预测结果
+        bboxes_pr = Y.result(np_img)  # 预测结果
         print(bboxes_pr)
 
         end_time1 = time.time()
@@ -134,7 +136,10 @@ if __name__ == '__main__':
         # dir_deal = "F:/robots_images_202107/save_p/orignal_dir/" + str_time + "_deal.jpg"
         # cv2.imwrite(dir, image)
         # cv2.imwrite(dir_deal, org_img)
+        #k = cv2.waitKey(0)
+        #if k==ord("s"):
+            #cv2.imwrite("./test_data/"+str(start_time)+".jpg", np_img)
 
         cv2.namedWindow('camera_output', 0)
-        cv2.imshow('camera_output', image)
+        cv2.imshow('camera_output',image)
         cv2.waitKey(30)
