@@ -39,5 +39,5 @@ def split_data_nums(data_root, one_nums):
 
 
 if __name__ == "__main__":
-    data_root = "F:/robots_images_202109/20210916/12"
-    split_data_nums(data_root, 500)
+    data_root = "G:/pic/JPGImages/12"
+    split_data_nums(data_root, 300)

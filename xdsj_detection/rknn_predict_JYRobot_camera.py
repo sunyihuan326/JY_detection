@@ -23,8 +23,8 @@ class UsbCamCapture:
         self.is_stop = False
         self.capture = cv2.VideoCapture(url)
         if self.capture.isOpened():
-            self.capture.set(3, 640)
-            self.capture.set(4, 360)
+            self.capture.set(3, 1280)
+            self.capture.set(4, 720)
             self.capture.read()
 
     def start(self):
@@ -48,6 +48,7 @@ class UsbCamCapture:
 
 
 INPUT_SIZE = 416
+
 
 class YoloPredict(object):
     '''
@@ -75,14 +76,15 @@ class YoloPredict(object):
             exit(ret)
 
     def predict(self, image):
-        img = cv2.resize(image, (INPUT_SIZE, INPUT_SIZE), interpolation=cv2.INTER_CUBIC)
+        #img = cv2.resize(image, (INPUT_SIZE, INPUT_SIZE), interpolation=cv2.INTER_CUBIC)
         org_image = np.copy(image)
         org_h, org_w, _ = org_image.shape
+        #image=utils.image_undistort(image) #图片预测前做矫正
 
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
         print(type(image_data))
 
-        outputs = self.rknn.inference(inputs=[img])
+        outputs = self.rknn.inference(inputs=[image_data])
         pred_sbbox = outputs[0]
         pred_mbbox = outputs[1]
         pred_lbbox = outputs[2]
@@ -114,21 +116,38 @@ if __name__ == '__main__':
     # 启动子线程
     usb_cam.start()
     # 暂停1秒，确保影像已经填充
-    time.sleep(1)
+    time.sleep(0.5)
+    i=0
 
     while True:
+        print("***************************")
+        start_time = time.time()
         np_img = usb_cam.get_frame()
+        np_img=utils.image_undistort(np_img) #图片预测前做矫正
+
+        i+=1
+        end_time0=time.time()
+        print("get img time:",end_time0-start_time)
+        
         org_img = copy.deepcopy(np_img)
 
-        start_time = time.time()
-        end_time0 = time.time()
 
         bboxes_pr = Y.result(np_img)  # 预测结果
-        print(bboxes_pr)
+        #print(bboxes_pr)
+        bboxes=[]
+        if len(bboxes_pr) > 0:
+            for b in bboxes_pr:
+                b = list(b)
+                b.append(utils.distance_to_camera(b[3]))
+                b.append(utils.compute_angle(b[0]))
+                b.append(utils.compute_angle(b[2]))
+                bboxes.append(b)
 
         end_time1 = time.time()
-        print("predict time:", end_time1 - end_time0)
-        image = utils.draw_bbox(np_img, bboxes_pr, show_label=True)
+        print("predict time:", end_time1 - start_time)
+        image = utils.draw_bbox(np_img,i, bboxes, show_label=True)
+        end_time2=time.time()
+        print("draw bbox time:",end_time2-end_time1)
 
         # t = time.localtime()
         # str_time = str(time.asctime(t)).replace(' ', '').replace(':', '')
@@ -143,3 +162,4 @@ if __name__ == '__main__':
         cv2.namedWindow('camera_output', 0)
         cv2.imshow('camera_output',image)
         cv2.waitKey(30)
+        print("imshow time:",time.time()-end_time2)
