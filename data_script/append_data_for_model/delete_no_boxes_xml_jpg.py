@@ -44,9 +44,9 @@ def delete_xml_jpg(jpg_dir, xml_dir, cut_save_dir):
 
 
 if __name__ == "__main__":
-    img_dir = "F:/robots_images_202109/20211126use/JPGImages"
-    xml_dir = "F:/robots_images_202109/20211126use/Annotations"
-    cut_save_dir = "F:/robots_images_202109/20211126use//use_cut"
+    img_dir = "F:/model_data/XDSJ/20211221use/JPGImages"
+    xml_dir = "F:/model_data/XDSJ/20211221use/Annotations"
+    cut_save_dir = "F:/model_data/XDSJ/20211221use/use_cut"
     if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
     delete_xml_jpg(img_dir, xml_dir, cut_save_dir)
     # cls_list = os.listdir(img_root)

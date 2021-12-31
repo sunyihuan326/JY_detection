@@ -442,7 +442,7 @@ for class_index, class_name in enumerate(gt_classes):
 sum_AP = 0.0
 ap_dictionary = {}
 
-error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-50_1207"
+error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-75_1230"
 if not os.path.exists(error_detect_imgs):os.mkdir(error_detect_imgs)
 # open file to store the results
 with open(results_files_path + "/results.txt", 'w') as results_file:
@@ -545,7 +545,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
 
                         if not os.path.exists(error_dir + "/high_iou"): os.mkdir(error_dir + "/high_iou")
                         # 拷贝图片
-                        print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
+                        # print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
                         shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
                                     error_dir + "/high_iou" + "/" + file_id + ".jpg")
             else:
@@ -556,7 +556,7 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
 
                 # 拷贝图片
                 if not os.path.exists(error_dir + "/low_iou"): os.mkdir(error_dir + "/low_iou")
-                print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
+                # print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
                 shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
                             error_dir + "/low_iou" + "/" + file_id + ".jpg")
 
@@ -695,7 +695,8 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
 r_nums = 0
 error_nums = 0
 for j in os.listdir(tmp_files_path):
-    if "cup" not in j and "carpet" not in j and "dishcloth" not in j and "dustbin" not in j and "line" not in j and "shoes" not in j and "socks" not in j:
+    if "cup" not in j and "carpet" not in j and "dishcloth" not in j and "dustbin" not in j \
+            and "line" not in j and "shoes" not in j and "socks" not in j and "station" not in j :
         j_file = tmp_files_path + "/" + j
         ground_truth_data = json.load(open(j_file))
         for o in ground_truth_data:

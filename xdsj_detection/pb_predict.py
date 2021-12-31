@@ -29,7 +29,7 @@ class YPredict(object):
         self.iou_threshold = cfg.TEST.IOU_THRESHOLD
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
         self.annotation_path = cfg.TEST.ANNOT_PATH
-        self.pb_file = "E:/JY_detection/xdsj_detection/checkpoint/padding_resize/mAP94/yolov3_94.pb"
+        self.pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_1226.pb"
         self.write_image = cfg.TEST.WRITE_IMAGE
         self.write_image_path = cfg.TEST.WRITE_IMAGE_PATH
         self.show_label = cfg.TEST.SHOW_LABEL
@@ -96,7 +96,7 @@ class YPredict(object):
     def result(self, image_path):
         image = cv2.imread(image_path)  # 图片读取
 
-        image = image_undistort(image)  # 图片畸变矫正
+        # image = image_undistort(image)  # 图片畸变矫正
 
         bboxes_pr = self.predict(image)  # 预测结果
 
@@ -108,42 +108,68 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    img_dir = "C:/Users/sunyihuan/Desktop/t/11"  # 图片文件地址
+    img_dir = "G:/pic/image_dir"  # 图片文件地址
 
-    save_dir = "C:/Users/sunyihuan/Desktop/t/11_de_jiaozheng"
+    save_dir = "G:/pic/image_dir_detect1226"
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YPredict()
     end_time0 = time.time()
     print("model loading time:", end_time0 - start_time)
 
     for img in tqdm(os.listdir(img_dir)):
-        if img.endswith("jpg"):
-            img_path = img_dir + "/" + img
-            # print(img)
-            end_time1 = time.time()
-            bboxes_p = Y.result(img_path)
-            bboxes = []
-            if len(bboxes_p) > 0:
-                for b in bboxes_p:
-                    b = list(b)
-                    # b0 = bboxes_undistort(b[:2])
-                    # b1 = bboxes_undistort(b[2:4])
-                    # b[:2] = b0
-                    # b[2:4] = b1
-                    b.append(distance_to_camera(b[3]))
-                    # b0[6] = compute_angle(b[0])
-                    # b0[7] = compute_angle(b[2])
-                    b.append(compute_angle(b[0]))
-                    b.append(compute_angle(b[2]))
-                    bboxes.append(b)
+        img_path = img_dir + "/" + img
+        # print(img)
+        end_time1 = time.time()
+        bboxes_p = Y.result(img_path)
+        bboxes = []
+        if len(bboxes_p) > 0:
+            for b in bboxes_p:
+                b = list(b)
+                # b0 = bboxes_undistort(b[:2])
+                # b1 = bboxes_undistort(b[2:4])
+                # b[:2] = b0
+                # b[2:4] = b1
+                b.append(distance_to_camera(b[3]))
+                # b0[6] = compute_angle(b[0])
+                # b0[7] = compute_angle(b[2])
+                b.append(compute_angle(b[0]))
+                b.append(compute_angle(b[2]))
+                bboxes.append(b)
 
-            print(bboxes)
-            image = cv2.imread(img_path)  # 图片读取
-            image = image_undistort(image)  # 图片畸变矫正
+        print(img, bboxes)
+        image = cv2.imread(img_path)  # 图片读取
+        # image = image_undistort(image)  # 图片畸变矫正
 
-            image = utils.draw_bbox(image, bboxes, show_label=True)
-            drawed_img_save_to_path = str(img_path).split("/")[-1]
-            cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)
+        image = utils.draw_bbox(image, bboxes, show_label=True)
+        drawed_img_save_to_path = str(img_path).split("/")[-1]
+        cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)
+        # if img.endswith("jpg") :
+        #     img_path = img_dir + "/" + img
+        #     # print(img)
+        #     end_time1 = time.time()
+        #     bboxes_p = Y.result(img_path)
+        #     bboxes = []
+        #     if len(bboxes_p) > 0:
+        #         for b in bboxes_p:
+        #             b = list(b)
+        #             # b0 = bboxes_undistort(b[:2])
+        #             # b1 = bboxes_undistort(b[2:4])
+        #             # b[:2] = b0
+        #             # b[2:4] = b1
+        #             b.append(distance_to_camera(b[3]))
+        #             # b0[6] = compute_angle(b[0])
+        #             # b0[7] = compute_angle(b[2])
+        #             b.append(compute_angle(b[0]))
+        #             b.append(compute_angle(b[2]))
+        #             bboxes.append(b)
+        #
+        #     print(img,bboxes)
+        #     image = cv2.imread(img_path)  # 图片读取
+        #     # image = image_undistort(image)  # 图片畸变矫正
+        #
+        #     image = utils.draw_bbox(image, bboxes, show_label=True)
+        #     drawed_img_save_to_path = str(img_path).split("/")[-1]
+        #     cv2.imwrite(save_dir + "/" + drawed_img_save_to_path, image)
 
     end_time1 = time.time()
     print("all data time:", end_time1 - end_time0)

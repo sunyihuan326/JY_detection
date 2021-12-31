@@ -34,7 +34,7 @@ def get_bboxes(xml_dir):
 
 
 if __name__ == "__main__":
-    xml_dir = "F:/model_data/XDSJ/test_annotations"
+    xml_dir = "F:/model_data/XDSJ/20211216use/Annotations"
     labels_nums = get_bboxes(xml_dir)
     s = 0
     for k in labels_nums.keys():

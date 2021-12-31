@@ -1,12 +1,92 @@
 # -*- coding: utf-8 -*-
+'''
+一键加入数据
+'''
+
 import os
 import argparse
 import xml.etree.ElementTree as ET
 import random
 from tqdm import tqdm
 from xdsj_detection.core.config import cfg
+import shutil
 
-def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=True):
+
+def delete_xml_jpg(jpg_dir, xml_dir, cut_save_dir):  # step1：删除无框数据
+    '''
+    删除无标签框图片和xml文件
+    :param inputpath: xml文件夹地址
+    :return:
+    '''
+    xml_cut_save_dir = cut_save_dir + "/Annotations"
+    jpg_cut_save_dir = cut_save_dir + "/JPGImages"
+    if not os.path.exists(xml_cut_save_dir): os.mkdir(xml_cut_save_dir)
+    if not os.path.exists(jpg_cut_save_dir): os.mkdir(jpg_cut_save_dir)
+
+    listdir = os.listdir(xml_dir)
+    for file in tqdm(listdir):
+        if file.endswith('xml'):
+            file_path = os.path.join(xml_dir, file)
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+            bboxes_nums = len(root.findall('object'))
+            if bboxes_nums < 1:
+                print(file)
+                shutil.move(file_path, xml_cut_save_dir + "/" + file)
+                if os.path.exists(jpg_dir + "/" + file.split(".")[0] + ".jpg"):
+                    shutil.move(jpg_dir + "/" + file.split(".")[0] + ".jpg",
+                                jpg_cut_save_dir + "/" + file.split(".")[0] + ".jpg")
+
+
+def split_data(data_root, test_percent, val_percent):  # step2：将所有图片分为train、test
+    '''
+    数据分为train、test
+    （所有jpg在一个文件中，不分小类别）
+    '''
+    if not os.path.exists(data_root):
+        print("cannot find such directory: " + data_root)
+        exit()
+    imgfilepath = data_root + "/JPGImages"
+    txtsavepath = data_root + "/ImageSets/Main"
+    if not os.path.exists(txtsavepath):
+        os.makedirs(txtsavepath)
+
+    total_xml = []
+    for a in os.listdir(imgfilepath):
+        if a.endswith(".jpg"):
+            total_xml.append(a)
+
+    random.shuffle(total_xml)  # 打乱total_xml
+    num = len(total_xml)
+
+    te = int(num * test_percent)  # test集数量
+    test = total_xml[:te]  # test集列表数据内容
+    val = int(num * val_percent)  # val集数量
+    val_list = total_xml[:te + val]  # val集列表数据内容
+    tr = num - val - te  # val集数量
+    print("train size:", tr)
+    print("test size:", te)
+    print("val size:", val)
+    ftest = open(txtsavepath + '/test_9.txt', 'w')
+    ftrain = open(txtsavepath + '/train_9.txt', 'w')
+    fval = open(txtsavepath + '/val_9.txt', 'w')
+
+    for x in total_xml:
+        if str(x).endswith("jpg"):
+            name = x[:-4] + '\n'
+            if x in test:
+                ftest.write(name)
+            elif x in val_list:
+                fval.write(name)
+            else:
+                ftrain.write(name)
+
+    ftrain.close()
+    ftest.close()
+    fval.close()
+
+
+def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=True):  # step3：生成txt文件
     def read_class_names(class_file_name):
         '''loads class name from a file'''
         names = []
@@ -55,27 +135,23 @@ def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=T
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path",
-                        default="F:/robots_images_202109/20211126use")
-    parser.add_argument("--train_annotation",
-                        default="F:/robots_images_202109/20211126use/train8.txt")
-    parser.add_argument("--test_annotation",
-                        default="F:/robots_images_202109/20211126use/test8.txt")
-    # parser.add_argument("--val_annotation",
-    #                     default="E:/DataSets/2020_two_phase_KXData/only2phase_data/val18.txt")
-    flags = parser.parse_args()
-    #
-    if os.path.exists(flags.train_annotation): os.remove(flags.train_annotation)
-    if os.path.exists(flags.test_annotation): os.remove(flags.test_annotation)
-    # if os.path.exists(flags.val_annotation): os.remove(flags.val_annotation)
-    # # #
-    num1 = convert_voc_annotation(flags.data_path, 'train_8',
-                                  flags.train_annotation, False)
-    num2 = convert_voc_annotation(flags.data_path, 'test_8',
-                                  flags.test_annotation, False)
-    # num3 = convert_voc_annotation(flags.data_path, 'val',
-    #                               flags.val_annotation, False)
-    # print(
-    #     '=> The number of image for train is: %d\tThe number of image for test is:%d\tThe number of image for val is:%d' % (
-    #         num1, num2, num3))
+    data_root = "F:/model_data/XDSJ/20211129use"
+
+    # step1:去除无框数据
+    img_dir = data_root + "/JPGImages"
+    xml_dir = data_root + "/Annotations"
+    cut_save_dir = data_root + "/use_cut"
+    if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
+    delete_xml_jpg(img_dir, xml_dir, cut_save_dir)
+
+    # step2:分train、test
+    test_percent = 0.1
+    val_percent = 0
+    split_data(data_root, test_percent, val_percent)
+
+    # step3：生成train.txt、test.txt
+    train_annotation = data_root + "/train9.txt"
+    test_annotation = data_root + "/test9.txt"
+    num1 = convert_voc_annotation(data_root, 'train_9', train_annotation, False)
+    num2 = convert_voc_annotation(data_root, 'test_9', test_annotation, False)
+    print("train nums::{},test nums:::{}".format(num1, num2))

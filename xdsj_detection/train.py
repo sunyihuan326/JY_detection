@@ -8,12 +8,13 @@ import shutil
 import numpy as np
 from tensorflow.python.framework import graph_util
 import tensorflow as tf
+import tensorflow.contrib.slim as slim
 print(tf.test.is_gpu_available())
 
 import xdsj_detection.core.utils as utils
 from tqdm import tqdm
 from xdsj_detection.core.dataset import Dataset
-from xdsj_detection.core.yolov3_gai import YOLOV3
+from xdsj_detection.core.yolov3 import YOLOV3
 from xdsj_detection.core.config import cfg
 
 class YoloTrain(object):
@@ -101,12 +102,12 @@ class YoloTrain(object):
                         self.train_op_with_all_variables = tf.no_op()
         restore_include = ["darknet"]
         with tf.name_scope('loader_and_saver'):
-            # variables = slim.get_variables_to_restore()
-            # variables_to_resotre = [v for v in variables if
-            #                         v.name.split('/')[0] not in ['conv_sbbox', 'conv_mbbox', 'conv_lbbox']]
-            # print(variables_to_resotre)
-            # self.loader = tf.train.Saver(variables_to_resotre)  # 仅加载部分参数
-            self.loader = tf.train.Saver(self.net_var)
+            variables = slim.get_variables_to_restore()
+            variables_to_resotre = [v for v in variables if
+                                    v.name.split('/')[0] not in ['conv_sbbox', 'conv_mbbox', 'conv_lbbox']]
+            print(variables_to_resotre)
+            self.loader = tf.train.Saver(variables_to_resotre)  # 仅加载部分参数
+            # self.loader = tf.train.Saver(self.net_var)
             self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=10)
 
         with tf.name_scope('summary'):
@@ -184,7 +185,7 @@ class YoloTrain(object):
             output = ["define_loss/pred_sbbox/concat_2", "define_loss/pred_mbbox/concat_2",
                       "define_loss/pred_lbbox/concat_2"]
             constant_graph = graph_util.convert_variables_to_constants(self.sess, self.sess.graph_def, output)
-            with tf.gfile.GFile('./model/yolo_model.pb', mode='wb') as f:
+            with tf.io.gfile.GFile('./model/yolo_model.pb', mode='wb') as f:
                 f.write(constant_graph.SerializeToString())
 
 

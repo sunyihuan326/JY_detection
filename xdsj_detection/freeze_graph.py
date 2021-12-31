@@ -9,12 +9,12 @@ ckpt文件转成pb文件
 """
 
 import tensorflow as tf
-from xdsj_detection.core.yolov3_gai import YOLOV3
+from xdsj_detection.core.yolov3 import YOLOV3
 
 typ = "yolov3"
 
-pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_1207.pb"
-ckpt_file = "E:/JY_detection/xdsj_detection/checkpoint/padding_resize/mAP8925/yolov3_test_loss=1.7258.ckpt-50"
+pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_1230.pb"
+ckpt_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.4973.ckpt-75"
 
 if typ == "tiny":
     output = ["define_loss/pred_mbbox/concat_2", "define_loss/pred_lbbox/concat_2"]

@@ -40,11 +40,12 @@ def copy_img2all(img_root, xml_root, img_save_root, xml_save_root):
 
 
 if __name__ == "__main__":
-    img_root = "F:/robots_images_202109/20210916/10"
-    xml_root = "F:/robots_images_202109/20210916/10_annotations"
-    img_save_root = "F:/robots_images_202109/20210916/10_use/JPGImages"
-    xml_save_root = "F:/robots_images_202109/20210916/10_use/Annotations"
+    img_root = "F:/扫地机项目/数据集/robots_iamges_202112/1210/JPGImages"
+    xml_root = "F:/扫地机项目/数据集/robots_iamges_202112/1210/Annotations"
+    img_save_root = "F:/扫地机项目/数据集/robots_iamges_202112/1210/use/JPGImages"
+    xml_save_root = "F:/扫地机项目/数据集/robots_iamges_202112/1210/use/Annotations"
     if not os.path.exists(img_save_root): os.mkdir(img_save_root)
     if not os.path.exists(xml_save_root): os.mkdir(xml_save_root)
 
-    copy_img2all(img_root, xml_root, img_save_root, xml_save_root)
+    copy_img2all(img_root, xml_root,
+                 img_save_root, xml_save_root)

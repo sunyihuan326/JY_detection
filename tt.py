@@ -98,3 +98,8 @@ if __name__ == "__main__":
 #     t.join()
 #
 # print("退出主线程")
+
+
+import tkinter
+from tkinter import messagebox
+from tkinter import simpledialog
