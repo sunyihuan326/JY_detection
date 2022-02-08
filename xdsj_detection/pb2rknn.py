@@ -40,6 +40,7 @@ if __name__ == '__main__':
     rknn.build(do_quantization=True,dataset='./dataset.txt')
     print('done')
 
+
     # 导出保存rknn模型文件
     rknn.export_rknn('./yolov3_ap94.rknn')
 

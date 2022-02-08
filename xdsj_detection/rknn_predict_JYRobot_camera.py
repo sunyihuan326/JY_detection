@@ -43,7 +43,8 @@ class UsbCamCapture:
 
     def query_frame(self):
         while not self.is_stop:
-            self.status, self.Frame = self.capture.read()
+            self.status, self.Frame0 = self.capture.read()
+            self.Frame = utils.image_undistort(self.Frame0)  # 图片预测前做矫正
         self.capture.release()
 
 
@@ -57,8 +58,8 @@ class YoloPredict(object):
 
     def __init__(self):
         self.input_size = INPUT_SIZE  # 输入图片尺寸（默认正方形）
-        self.num_classes = 8  # 种类数
-        self.score_threshold = 0.3
+        self.num_classes = 9  # 种类数
+        self.score_threshold = 0.5
         self.iou_threshold = 0.5
         self.RKNN_MODEL_PATH = "./yolov3_JYRobot_94_quantization_i16.rknn"  # pb文件地址
         self.rknn = RKNNLite()
@@ -76,13 +77,11 @@ class YoloPredict(object):
             exit(ret)
 
     def predict(self, image):
-        #img = cv2.resize(image, (INPUT_SIZE, INPUT_SIZE), interpolation=cv2.INTER_CUBIC)
+        # img = cv2.resize(image, (INPUT_SIZE, INPUT_SIZE), interpolation=cv2.INTER_CUBIC)
         org_image = np.copy(image)
         org_h, org_w, _ = org_image.shape
-        #image=utils.image_undistort(image) #图片预测前做矫正
 
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
-        print(type(image_data))
 
         outputs = self.rknn.inference(inputs=[image_data])
         pred_sbbox = outputs[0]
@@ -99,7 +98,7 @@ class YoloPredict(object):
         return bboxes
 
     def result(self, image_path):
-        #image = cv2.imread(image_path)  # 图片读取
+        # image = cv2.imread(image_path)  # 图片读取
         bboxes_pr = self.predict(image_path)
         print("预测结果：", bboxes_pr)
         # memory_detail = self.rknn.eval_memory()
@@ -117,24 +116,23 @@ if __name__ == '__main__':
     usb_cam.start()
     # 暂停1秒，确保影像已经填充
     time.sleep(0.5)
-    i=0
+    i = 0
 
     while True:
         print("***************************")
         start_time = time.time()
         np_img = usb_cam.get_frame()
-        np_img=utils.image_undistort(np_img) #图片预测前做矫正
+        np_img = utils.image_undistort(np_img)  # 图片预测前做矫正
 
-        i+=1
-        end_time0=time.time()
-        print("get img time:",end_time0-start_time)
-        
+        i += 1
+        end_time0 = time.time()
+        print("get img time:", end_time0 - start_time)
+
         org_img = copy.deepcopy(np_img)
 
-
         bboxes_pr = Y.result(np_img)  # 预测结果
-        #print(bboxes_pr)
-        bboxes=[]
+        # print(bboxes_pr)
+        bboxes = []
         if len(bboxes_pr) > 0:
             for b in bboxes_pr:
                 b = list(b)
@@ -143,23 +141,14 @@ if __name__ == '__main__':
                 b.append(utils.compute_angle(b[2]))
                 bboxes.append(b)
 
+        print("预测结果：", bboxes)
         end_time1 = time.time()
         print("predict time:", end_time1 - start_time)
-        image = utils.draw_bbox(np_img,i, bboxes, show_label=True)
-        end_time2=time.time()
-        print("draw bbox time:",end_time2-end_time1)
-
-        # t = time.localtime()
-        # str_time = str(time.asctime(t)).replace(' ', '').replace(':', '')
-        # dir = "F:/robots_images_202107/save_p/detect_dir/" + str_time + ".jpg"
-        # dir_deal = "F:/robots_images_202107/save_p/orignal_dir/" + str_time + "_deal.jpg"
-        # cv2.imwrite(dir, image)
-        # cv2.imwrite(dir_deal, org_img)
-        #k = cv2.waitKey(0)
-        #if k==ord("s"):
-            #cv2.imwrite("./test_data/"+str(start_time)+".jpg", np_img)
+        image = utils.draw_bbox(np_img, i, bboxes, show_label=True)
+        end_time2 = time.time()
+        print("draw bbox time:", end_time2 - end_time1)
 
         cv2.namedWindow('camera_output', 0)
-        cv2.imshow('camera_output',image)
+        cv2.imshow('camera_output', image)
         cv2.waitKey(30)
-        print("imshow time:",time.time()-end_time2)
+        print("imshow time:", time.time() - end_time2)
