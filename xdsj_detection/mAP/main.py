@@ -442,7 +442,7 @@ for class_index, class_name in enumerate(gt_classes):
 sum_AP = 0.0
 ap_dictionary = {}
 
-error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-75_1230"
+error_detect_imgs = "E:/JY_detection/xdsj_detection/error_detect_imgs-85"
 if not os.path.exists(error_detect_imgs):os.mkdir(error_detect_imgs)
 # open file to store the results
 with open(results_files_path + "/results.txt", 'w') as results_file:
@@ -692,38 +692,42 @@ with open(results_files_path + "/results.txt", 'w') as results_file:
     results_file.write(text + "\n")
     print(text)
 
-r_nums = 0
-error_nums = 0
-for j in os.listdir(tmp_files_path):
-    if "cup" not in j and "carpet" not in j and "dishcloth" not in j and "dustbin" not in j \
-            and "line" not in j and "shoes" not in j and "socks" not in j and "station" not in j :
-        j_file = tmp_files_path + "/" + j
-        ground_truth_data = json.load(open(j_file))
-        for o in ground_truth_data:
-            if bool(o["used"]):
-                r_nums += 1
-            else:
-                error_nums += 1
-                class_name0 = o["class_name"]
-                file_id = o["file_id"]
-
-                # 拷贝图片
-                error_dir = error_detect_imgs + "/" + class_name0
-                if not os.path.exists(error_dir): os.mkdir(error_dir)
-                if not os.path.exists(error_dir + "/nobboxes"): os.mkdir(error_dir + "/nobboxes")
-                writes_img_list = []
-                if os.path.exists(error_dir + "/high_iou"):
-                    for f in os.listdir(error_dir + "/high_iou"):
-                        writes_img_list.append(f)
-                if os.path.exists(error_dir + "/low_iou"):
-                    for f in os.listdir(error_dir + "/low_iou"):
-                        writes_img_list.append(f)
-                if file_id + ".jpg" not in writes_img_list:
-                    # print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
-                    shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
-                                error_dir + "/nobboxes" + "/" + file_id + ".jpg")
-
-print("r_nums:", r_nums, "    error_nums:", error_nums)
+# r_nums = 0
+# error_nums = 0
+# for j in os.listdir(tmp_files_path):
+#     if "cup" not in j and "carpet" not in j and "dishcloth" not in j and "dustbin" not in j \
+#             and "line" not in j and "shoes" not in j and "socks" not in j and "station" not in j :
+#         j_file = tmp_files_path + "/" + j
+#         ground_truth_data = json.load(open(j_file))
+#         for o in ground_truth_data:
+#             print(o)
+#             if bool(o["used"]):
+#                 r_nums += 1
+#             else:
+#                 error_nums += 1
+#                 class_name0 = o["class_name"]
+#                 file_id = o["file_id"]
+#
+#                 # 拷贝图片
+#                 error_dir = error_detect_imgs + "/" + class_name0
+#                 if not os.path.exists(error_dir): os.mkdir(error_dir)
+#                 if not os.path.exists(error_dir + "/nobboxes"): os.mkdir(error_dir + "/nobboxes")
+#                 writes_img_list = []
+#                 if os.path.exists(error_dir + "/high_iou"):
+#                     for f in os.listdir(error_dir + "/high_iou"):
+#                         writes_img_list.append(f)
+#                 if os.path.exists(error_dir + "/low_iou"):
+#                     for f in os.listdir(error_dir + "/low_iou"):
+#                         writes_img_list.append(f)
+#                 if file_id + ".jpg" not in writes_img_list:
+#                     # print("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg")
+#                     try:
+#                         shutil.copy("E:/JY_detection/xdsj_detection/detection/" + file_id + ".jpg",
+#                                     error_dir + "/nobboxes" + "/" + file_id + ".jpg")
+#                     except:
+#                         pass
+#
+# print("r_nums:", r_nums, "    error_nums:", error_nums)
 
 # remove the tmp_files directory
 # shutil.rmtree(tmp_files_path)

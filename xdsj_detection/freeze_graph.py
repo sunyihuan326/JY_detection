@@ -13,8 +13,8 @@ from xdsj_detection.core.yolov3 import YOLOV3
 
 typ = "yolov3"
 
-pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_1230.pb"
-ckpt_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.4973.ckpt-75"
+pb_file = "E:/JY_detection/xdsj_detection/model/yolo_60.pb"
+ckpt_file ="E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.9800.ckpt-60"
 
 if typ == "tiny":
     output = ["define_loss/pred_mbbox/concat_2", "define_loss/pred_lbbox/concat_2"]

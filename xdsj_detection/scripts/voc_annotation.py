@@ -12,6 +12,46 @@ from xdsj_detection.core.config import cfg
 import shutil
 
 
+def delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir):
+    '''
+    删除多余的xml文件和jpg文件
+    :param img_dir: 图片地址
+    :param xml_dir: xml文件标注地址
+    :return:
+    '''
+    xml_name_list = os.listdir(xml_dir)
+    img_name_list = os.listdir(img_dir)
+
+    xml_cut_save_dir = cut_save_dir + "/Annotations"
+    jpg_cut_save_dir = cut_save_dir + "/JPGImages"
+    if not os.path.exists(xml_cut_save_dir): os.mkdir(xml_cut_save_dir)
+    if not os.path.exists(jpg_cut_save_dir): os.mkdir(jpg_cut_save_dir)
+
+    # jpg中有,xml中没有
+    print("图片总数：", len(img_name_list))
+    print("未标注图片名称：")
+    for i in img_name_list:
+        try:
+            if not i.endswith(".jpg"):
+                os.remove(img_dir + "/" + i)
+            if str(i.split(".jpg")[0] + ".xml") not in xml_name_list:
+                print(img_dir + "/" + i)
+                shutil.move(img_dir + "/" + i, jpg_cut_save_dir + "/" + i)
+        except:
+            print(img_dir + "/" + i)
+
+    # xml中有，jpg中没有的
+    print("已标注总数：", len(xml_name_list))
+    print("已标注，但图片已删除名称：")
+    for i in xml_name_list:
+        # print(i)
+        if not i.endswith(".xml"):
+            os.remove(xml_dir + "/" + i)
+        else:
+            if str(i.split(".xml")[0] + ".jpg") not in img_name_list:
+                print(xml_dir + "/" + i)
+                shutil.move(xml_dir + "/" + i, xml_cut_save_dir + "/" + i)
+
 def delete_xml_jpg(jpg_dir, xml_dir, cut_save_dir):  # step1：删除无框数据
     '''
     删除无标签框图片和xml文件
@@ -67,9 +107,9 @@ def split_data(data_root, test_percent, val_percent):  # step2：将所有图片
     print("train size:", tr)
     print("test size:", te)
     print("val size:", val)
-    ftest = open(txtsavepath + '/test_9.txt', 'w')
-    ftrain = open(txtsavepath + '/train_9.txt', 'w')
-    fval = open(txtsavepath + '/val_9.txt', 'w')
+    ftest = open(txtsavepath + '/test_20.txt', 'w')
+    ftrain = open(txtsavepath + '/train_20.txt', 'w')
+    fval = open(txtsavepath + '/val_20.txt', 'w')
 
     for x in total_xml:
         if str(x).endswith("jpg"):
@@ -135,13 +175,14 @@ def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=T
 
 
 if __name__ == '__main__':
-    data_root = "F:/model_data/XDSJ/20211129use"
+    data_root = "F:/model_data/XDSJ/20221025use"
 
     # step1:去除无框数据
     img_dir = data_root + "/JPGImages"
     xml_dir = data_root + "/Annotations"
     cut_save_dir = data_root + "/use_cut"
     if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
+    delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir)
     delete_xml_jpg(img_dir, xml_dir, cut_save_dir)
 
     # step2:分train、test
@@ -150,8 +191,8 @@ if __name__ == '__main__':
     split_data(data_root, test_percent, val_percent)
 
     # step3：生成train.txt、test.txt
-    train_annotation = data_root + "/train9.txt"
-    test_annotation = data_root + "/test9.txt"
-    num1 = convert_voc_annotation(data_root, 'train_9', train_annotation, False)
-    num2 = convert_voc_annotation(data_root, 'test_9', test_annotation, False)
+    train_annotation = data_root + "/train20.txt"
+    test_annotation = data_root + "/test20.txt"
+    num1 = convert_voc_annotation(data_root, 'train_20', train_annotation, False)
+    num2 = convert_voc_annotation(data_root, 'test_20', test_annotation, False)
     print("train nums::{},test nums:::{}".format(num1, num2))

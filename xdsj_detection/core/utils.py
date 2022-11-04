@@ -186,6 +186,11 @@ def postprocess_boxes(pred_bbox, org_img_shape, input_size, score_threshold):
     pred_coor[:, 0::2] = 1.0 * (pred_coor[:, 0::2] - dw) / resize_ratio
     pred_coor[:, 1::2] = 1.0 * (pred_coor[:, 1::2] - dh) / resize_ratio
 
+    print("pred_coor.shape   ***********")
+    print(pred_coor.shape)
+    print("pred_coor[0]  ***********")
+    print(pred_coor[0])
+
     # # (3) clip some boxes those are out of range
     pred_coor = np.concatenate([np.maximum(pred_coor[:, :2], [0, 0]),
                                 np.minimum(pred_coor[:, 2:], [org_w - 1, org_h - 1])], axis=-1)

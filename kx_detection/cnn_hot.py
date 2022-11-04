@@ -14,7 +14,7 @@ from tensorflow.python import pywrap_tensorflow
 
 import numpy as np
 import cv2
-import multi_detection.core.utils as utils
+import kx_detection.core.utils as utils
 
 
 class YoloPredict(object):

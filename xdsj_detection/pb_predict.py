@@ -29,7 +29,7 @@ class YPredict(object):
         self.iou_threshold = cfg.TEST.IOU_THRESHOLD
         self.moving_ave_decay = cfg.YOLO.MOVING_AVE_DECAY
         self.annotation_path = cfg.TEST.ANNOT_PATH
-        self.pb_file = "E:/JY_detection/xdsj_detection/model/yolov3_1226.pb"
+        self.pb_file = "E:/JY_detection/xdsj_detection/model/yolo_60.pb"
         self.write_image = cfg.TEST.WRITE_IMAGE
         self.write_image_path = cfg.TEST.WRITE_IMAGE_PATH
         self.show_label = cfg.TEST.SHOW_LABEL
@@ -43,16 +43,17 @@ class YPredict(object):
                 _ = tf.import_graph_def(output_graph_def, name="")
 
             self.sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
-            self.input = self.sess.graph.get_tensor_by_name("define_input/input_data:0")
+            # 输入
+            self.input = graph.get_tensor_by_name("define_input/input_data:0")
 
-            # 输出
-            if self.typ == "tiny":
-                self.pred_mbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
-                self.pred_lbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
-            else:
-                self.pred_sbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_sbbox/concat_2:0")
-                self.pred_mbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
-                self.pred_lbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
+            # 输出检测结果
+            # self.conv_sbbox = graph.get_tensor_by_name("define_loss/conv_sbbox/BiasAdd:0")
+            # self.conv_mbbox = graph.get_tensor_by_name("define_loss/conv_mbbox/BiasAdd:0")
+            # self.conv_lbbox = graph.get_tensor_by_name("define_loss/conv_lbbox/BiasAdd:0")
+
+            self.pred_sbbox = graph.get_tensor_by_name("define_loss/pred_sbbox/concat_2:0")
+            self.pred_mbbox = graph.get_tensor_by_name("define_loss/pred_mbbox/concat_2:0")
+            self.pred_lbbox = graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
 
     def predict(self, image):
         org_image = np.copy(image)
@@ -61,33 +62,16 @@ class YPredict(object):
         image_data = utils.image_preporcess(image, [self.input_size, self.input_size])
         image_data = image_data[np.newaxis, ...]
 
-        img = cv2.resize(image, (self.input_size, self.input_size), interpolation=cv2.INTER_CUBIC)
-        # print(image_data.shape)
-        if self.typ == "tiny":
-            pred_mbbox, pred_lbbox = self.sess.run(
-                [self.pred_mbbox, self.pred_lbbox],
-                feed_dict={
-                    self.input: image_data,
-                    # self.input: img,
-                }
-            )
+        pred_sbbox, pred_mbbox, pred_lbbox = self.sess.run(
+            [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
+            feed_dict={
+                self.input: image_data,
+            }
+        )
 
-            pred_bbox = np.concatenate([np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
-                                        np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
-        else:
-            pred_sbbox, pred_mbbox, pred_lbbox = self.sess.run(
-                [self.pred_sbbox, self.pred_mbbox, self.pred_lbbox],
-                feed_dict={
-                    self.input: image_data,
-                    # self.input: img,
-                }
-            )
-            # print(pred_sbbox.sum())
-
-            pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),
-                                        np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
-                                        np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
-
+        pred_bbox = np.concatenate([np.reshape(pred_sbbox, (-1, 5 + self.num_classes)),
+                                    np.reshape(pred_mbbox, (-1, 5 + self.num_classes)),
+                                    np.reshape(pred_lbbox, (-1, 5 + self.num_classes))], axis=0)
         bboxes = utils.postprocess_boxes(pred_bbox, (org_h, org_w), self.input_size, self.score_threshold)
         bboxes = utils.nms(bboxes, self.iou_threshold)
 
@@ -108,9 +92,9 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    img_dir = "G:/pic/image_dir"  # 图片文件地址
+    img_dir = "C:/Users/sunyihuan/Desktop/t"  # 图片文件地址
 
-    save_dir = "G:/pic/image_dir_detect1226"
+    save_dir = "C:/Users/sunyihuan/Desktop/t_"
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YPredict()
     end_time0 = time.time()

@@ -8,12 +8,11 @@
 
 import tensorflow as tf
 from tensorflow.python import pywrap_tensorflow
+import os
 
 import numpy as np
 import cv2
-import kx_detection.core.utils as utils
-import os
-from tqdm import tqdm
+import xdsj_detection.core.utils as utils
 
 
 class YoloPredict(object):
@@ -23,12 +22,12 @@ class YoloPredict(object):
 
     def __init__(self):
         self.input_size = 416  # 输入图片尺寸（默认正方形）
-        self.num_classes = 40  # 种类数
+        self.num_classes = 19  # 种类数
         self.top_n = 3
         self.score_cls_threshold = 0.001
         self.score_threshold = 0.45
         self.iou_threshold = 0.5
-        self.weight_file = self.weight_file = "E:/ckpt_dirs/Food_detection/multi_food5/20200914/yolov3_train_loss=6.9178.ckpt-95"   # ckpt文件地址
+        self.weight_file =  "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=3.3370.ckpt-85" # ckpt文件地址
         self.write_image = True  # 是否画图
         self.show_label = True  # 是否显示标签
 
@@ -55,8 +54,8 @@ class YoloPredict(object):
             self.pred_lbbox = self.sess.graph.get_tensor_by_name("define_loss/pred_lbbox/concat_2:0")
 
             # 烤层
-            self.layer_num_pre = graph.get_tensor_by_name("define_loss/darknet/residual20/add:0")
-            self.layer_num = graph.get_tensor_by_name("define_loss/layer_classes:0")
+            # self.layer_num_pre = graph.get_tensor_by_name("define_loss/darknet/residual20/add:0")
+            # self.layer_num = graph.get_tensor_by_name("define_loss/layer_classes:0")
 
 
 class get_cam(object):
@@ -99,10 +98,8 @@ class get_cam(object):
         image_data = utils.image_preporcess(image, [Y.input_size, Y.input_size])
         image_data = image_data[np.newaxis, ...]
 
-        pred_sbbox, pred_pre_sbbox, pred_mbbox, pred_pre_mbbox, pred_lbbox, pred_pre_lbbox, layer_num_pre, layer_n = Y.sess.run(
-            [Y.pred_sbbox, Y.pred_pre_sbbox, Y.pred_mbbox, Y.pred_pre_mbbox, Y.pred_lbbox, Y.pred_pre_lbbox,
-             Y.layer_num_pre,
-             Y.layer_num],
+        pred_sbbox, pred_pre_sbbox, pred_mbbox, pred_pre_mbbox, pred_lbbox, pred_pre_lbbox = Y.sess.run(
+            [Y.pred_sbbox, Y.pred_pre_sbbox, Y.pred_mbbox, Y.pred_pre_mbbox, Y.pred_lbbox, Y.pred_pre_lbbox,],
             feed_dict={
                 Y.input: image_data,
                 Y.trainable: False
@@ -132,15 +129,16 @@ class get_cam(object):
         return heatmap_lbbox
 
 
+
 if __name__ == "__main__":
     Y = YoloPredict()
 
-    img_dir = "F:/chiffon10_0929/chiffoncake8"
-    cam_dir ="F:/chiffon10_0929/chiffoncake8_cam"
+    img_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280"
+    cam_dir ="F:/robot_test_from_YangYalin/saved_pictures_1280_0927cam"
     for img_name in os.listdir(img_dir):
         if img_name.endswith(".jpg"):
             img_path = img_dir + "/" + img_name
-            heatmap = get_cam(img_path, Y).cam("s")
+            heatmap = get_cam(img_path, Y).cam("m")
 
             heatmap = np.mean(heatmap, axis=-1)
             heatmap = np.maximum(heatmap, 0)
@@ -158,6 +156,6 @@ if __name__ == "__main__":
                 heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
 
                 superimposed_img = heatmap * 0.4 + img
-                cv2.imwrite('{0}/{1}_cam_s.jpg'.format(cam_dir, img_name.split(".jpg")[0]), superimposed_img)
+                cv2.imwrite('{0}/{1}_cam_m.jpg'.format(cam_dir, img_name.split(".jpg")[0]), superimposed_img)
             except:
                 print(img_path)

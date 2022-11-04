@@ -57,7 +57,7 @@ def split_data(data_root, test_percent, val_percent):
 
 
 if __name__ == "__main__":
-    data_root = "F:/model_data/XDSJ/20211221use"
+    data_root = "F:/ObjectRecognition/data/all_model_data/imageset2022/2022imageset"
     test_percent = 0.2
     val_percent = 0
     split_data(data_root, test_percent, val_percent)

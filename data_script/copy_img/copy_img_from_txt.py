@@ -25,7 +25,6 @@ def from_txt_copy_data2all(txt_path, save_dir, jpg_typ, layer_tpy=False):
     txt_files = txt_file.readlines()
     print(len(txt_files))
 
-    assert jpg_typ in ["jpg", "xml"]
     if layer_tpy:
         layer_dir = save_dir + "/layer_data"
         # if not os.path.exists(layer_dir):os.mkdir(layer_dir)
@@ -40,7 +39,7 @@ def from_txt_copy_data2all(txt_path, save_dir, jpg_typ, layer_tpy=False):
         for file in tqdm(txt_files):
             img_name = file.strip().split(" ")[0]
             jpg_name = str(img_name).split("/")[-1]
-            cls = int(file.strip().split(" ")[-1].split(",")[-1])
+
             if "_hot.jpg" not in file and "_zi.jpg" not in file and "_lv.jpg" not in file and "_huang.jpg" not in file:
                 shutil.copy(img_name, save_dir + "/" + jpg_name)
                 if layer_tpy:
@@ -69,24 +68,40 @@ def from_txt_copy_data2all(txt_path, save_dir, jpg_typ, layer_tpy=False):
             #             shutil.copy(img_name, layer_dir + "/others" + "/" + jpg_name)
             #         else:
             #             print(file)
-    else:  # 拷贝xml数据
+    elif jpg_typ == "xml":  # 拷贝xml数据
         for file in tqdm(txt_files):
             img_name = file.split(" ")[0]
             jpg_name = str(img_name).split("/")[-1]
             na = str(jpg_name.split(".jpg")[0]) + ".xml"
             xml_path = img_name.split("JPGImages")[0] + "Annotations/" + na
-            cls = int(file.strip().split(" ")[-1][-1])
-            if "_hot.jpg" not in file and "_zi.jpg" not in file and "_lv.jpg" not in file and "_huang.jpg" not in file:
-                # shutil.copy(xml_path, save_dir + "/" + na)
-                try:
-                    shutil.copy(xml_path, save_dir + "/" + na)
-                except:
-                    print(xml_path)
+            shutil.copy(xml_path, save_dir + "/" + na)
+            # cls = int(file.strip().split(" ")[-1][-1])
+            # if "_hot.jpg" not in file and "_zi.jpg" not in file and "_lv.jpg" not in file and "_huang.jpg" not in file:
+            #     # shutil.copy(xml_path, save_dir + "/" + na)
+            #     try:
+            #         shutil.copy(xml_path, save_dir + "/" + na)
+            #     except:
+            #         print(xml_path)
             # if cls == 37:
             #     try:
             #         shutil.copy(xml_path, save_dir + "/" + na)
             #     except:
             #         print(na)
+    else:
+        for file in tqdm(txt_files):
+            img_name = file.strip().split(" ")[0]
+            jpg_name = str(img_name).split("/")[-1]
+            na = str(jpg_name.split(".jpg")[0]) + ".xml"
+            xml_path = img_name.split("JPGImages")[0] + "Annotations/" + na
+
+            if not os.path.exists(save_dir + "/JPGImages/"): os.mkdir(save_dir + "/JPGImages/")
+            if not os.path.exists(save_dir + "/Annotations/"): os.mkdir(save_dir + "/Annotations/")
+
+            shutil.copy(img_name, save_dir + "/JPGImages/" + jpg_name)
+            try:
+                shutil.copy(xml_path, save_dir + "/Annotations/" + na)
+            except:
+                print(save_dir + "/Annotations/" + na)
 
 
 def from_model_txt_copy_jpg(txt_path, jpg_save_dir):
@@ -107,9 +122,9 @@ def from_model_txt_copy_jpg(txt_path, jpg_save_dir):
 
 
 if __name__ == "__main__":
-    txt_path = "F:/model_data/ZG/Li/vocleddata-food38-20210118/food38_train_huang_hot.txt"
-    save_dir = "F:/model_data/ZG/Li/vocleddata-food38-20210118/train_aug_for_model/"
-    if not os.path.exists(save_dir):os.mkdir(save_dir)
+    txt_path = "E:/JY_detection/xdsj_detection/data/dataset/test19_0930.txt"
+    save_dir = "F:/model_data/XDSJ/all_data/20221018"
+    if not os.path.exists(save_dir): os.mkdir(save_dir)
     # if not os.path.exists(save_dir): os.mkdir(save_dir)
     # from_txt_copy_data2all(txt_path, save_dir, "jpg", True)
     #
@@ -117,4 +132,4 @@ if __name__ == "__main__":
     # if not os.path.exists(save_dir_anno): os.mkdir(save_dir_anno)
     # from_txt_copy_data2all(txt_path, save_dir_anno, "xml", False)
 
-    from_model_txt_copy_jpg(txt_path, save_dir)
+    from_txt_copy_data2all(txt_path, save_dir,"all")

@@ -28,13 +28,11 @@ class YoloPredict(object):
 
     def __init__(self):
         self.input_size = 416  # 输入图片尺寸（默认正方形）
-        self.num_classes = 9  # 种类数
-        self.score_cls_threshold = 0.001
+        self.num_classes = 19  # 种类数
 
         self.score_threshold = 0.45
         self.iou_threshold = 0.5
-        self.top_n = 5
-        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=1.5417.ckpt-55"  # ckpt文件地址
+        self.weight_file = "E:/JY_detection/xdsj_detection/checkpoint/yolov3_test_loss=2.2842.ckpt-75" # ckpt文件地址
         # self.weight_file = "./checkpoint/yolov3_train_loss=4.7681.ckpt-80"
         self.write_image = True  # 是否画图
         self.show_label = True  # 是否显示标签
@@ -112,9 +110,14 @@ class YoloPredict(object):
 if __name__ == '__main__':
     start_time = time.time()
 
-    img_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280"  # 图片文件地址
+    # img_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280"  # 图片文件地址
+    #
+    # save_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280_detetction1012"
 
-    save_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280_detection_1226"
+    img_dir = "F:/RobotProgram/data/other_camera/100_A03"  # 图片文件地址
+
+    save_dir = "F:/RobotProgram/data/other_camera/100_A03_detect"
+
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YoloPredict()
     end_time0 = time.time()

@@ -3,7 +3,7 @@
 # @Author  : sunyihuan
 # @File    : txt_to_txt.py
 '''
-讲bai之前版本数据集，更改为本模型数据加载使用格式
+将bai之前版本数据集，更改为本模型数据加载使用格式
 '''
 
 

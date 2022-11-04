@@ -25,12 +25,12 @@ def get_bboxes(xml_name):
     root = tree.getroot()
     for object1 in root.findall('object'):
         bbox = object1.find('bndbox')
-        # label_name = object1.find('name').text.lower().strip()
+        label_name = object1.find('name').text.lower().strip()
         xmin = bbox.find('xmin').text.strip()
         xmax = bbox.find('xmax').text.strip()
         ymin = bbox.find('ymin').text.strip()
         ymax = bbox.find('ymax').text.strip()
-        bb.append([int(xmin), int(ymin), int(xmax), int(ymax)])
+        bb.append([int(xmin), int(ymin), int(xmax), int(ymax),label_name])
     return bb
 
 
@@ -68,9 +68,9 @@ def dir_fill(image_dir, xml_dir, save_dir):
             jpg_bb_fill(image_file, bb, save_dir)
 
 
-if __name__ == "__main__":
-    image_dir = "F:/model_data/XDSJ/202107/JPGImages"
-    save_dir = "F:/model_data/XDSJ/202107/JPGImages_aug"
-    if not os.path.exists(save_dir): os.mkdir(save_dir)
-    xml_dir = "F:/model_data/XDSJ/202107/Annotations"
-    dir_fill(image_dir, xml_dir, save_dir)
+# if __name__ == "__main__":
+#     image_dir = "F:/model_data/XDSJ/202107/JPGImages"
+#     save_dir = "F:/model_data/XDSJ/202107/JPGImages_aug"
+#     if not os.path.exists(save_dir): os.mkdir(save_dir)
+#     xml_dir = "F:/model_data/XDSJ/202107/Annotations"
+#     dir_fill(image_dir, xml_dir, save_dir)

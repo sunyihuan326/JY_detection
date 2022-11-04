@@ -106,8 +106,8 @@ class YoloTrain(object):
             variables_to_resotre = [v for v in variables if
                                     v.name.split('/')[0] not in ['conv_sbbox', 'conv_mbbox', 'conv_lbbox']]
             print(variables_to_resotre)
-            self.loader = tf.train.Saver(variables_to_resotre)  # 仅加载部分参数
-            # self.loader = tf.train.Saver(self.net_var)
+            # self.loader = tf.train.Saver(variables_to_resotre)  # 仅加载部分参数
+            self.loader = tf.train.Saver(self.net_var)
             self.saver = tf.train.Saver(tf.global_variables(), max_to_keep=10)
 
         with tf.name_scope('summary'):
@@ -135,7 +135,7 @@ class YoloTrain(object):
             print('=> %s does not exist !!!' % self.initial_weight)
             print('=> Now it starts to train YOLOV3 from scratch ...')
             self.start_epochs = 0
-        for epoch in range(self.start_epochs + 1, 1 + self.first_stage_epochs + self.second_stage_epochs):
+        for epoch in range(self.start_epochs+1, 1 + self.first_stage_epochs + self.second_stage_epochs):
             if epoch <= self.first_stage_epochs:
                 train_op = self.train_op_with_frozen_variables
             else:
