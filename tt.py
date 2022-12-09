@@ -155,9 +155,27 @@ def mylog(func):
 #
 # nums = [0, 5, 6, 98, 5, 7, -1, 2, 0, 3, 6]
 from PIL import Image
+#
+# if __name__ == "__main__":
+#     img_path = "C:/Users/sunyihuan/Desktop/166.jpg"
+#     color_img = Image.open(img_path)
+#     gray_img = color_img.convert('L')
+#     gray_img.save("C:/Users/sunyihuan/Desktop/166_L.jpg")
 
-if __name__ == "__main__":
-    img_path = "C:/Users/sunyihuan/Desktop/166.jpg"
-    color_img = Image.open(img_path)
-    gray_img = color_img.convert('L')
-    gray_img.save("C:/Users/sunyihuan/Desktop/166_L.jpg")
+class ss(object):
+    def __init__(self):
+        self.a=10
+
+hh=ss()
+hh.a=1
+
+class s0(object):
+    def a(self):
+        global hh
+        hh.a=1
+
+
+
+# if __name__ == "__main__":
+#     hh=ss()
+#     hh.a=1

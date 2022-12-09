@@ -122,8 +122,8 @@ def from_model_txt_copy_jpg(txt_path, jpg_save_dir):
 
 
 if __name__ == "__main__":
-    txt_path = "E:/JY_detection/xdsj_detection/data/dataset/test19_0930.txt"
-    save_dir = "F:/model_data/XDSJ/all_data/20221018"
+    txt_path = "E:/JY_detection/xdsj_detection/data/dataset/test22_1111.txt"
+    save_dir = "F:/model_data/XDSJ/all_data/20221115"
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     # if not os.path.exists(save_dir): os.mkdir(save_dir)
     # from_txt_copy_data2all(txt_path, save_dir, "jpg", True)

@@ -43,7 +43,7 @@ def change_txt(txt_path, src_txtpath, file_path, typ):
             else:
                 print(img_path_name)
         else:  # .jpg前的字段需要更改
-            jpg_name = str(img_path_name.split("JPGImages")[1]).split(".jpg")[0] + "_{}.jpg".format(typ) + \
+            jpg_name = str(img_path_name.split("JPGImages")[1]).split(".jpg")[0] + ".jpg" + \
                        str(img_path_name.split("JPGImages")[1]).split(".jpg")[1]
             print(jpg_name)
             txt_file_name += jpg_name
@@ -80,11 +80,11 @@ def replace_txt_path(txt_path, src_txtpath, file_path, target_path):
 
 
 if __name__ == "__main__":
-    txt_path = "F:/model_data/XDSJ/20211126use/train8.txt"
-    new_txt_name = "F:/model_data/XDSJ/20211126use/train8.txt"
-    file_path = "F:/robots_images_202109/20211126use"
+    txt_path = "E:/JY_detection/xdsj_detection/data/dataset/train22_1111_serve.txt"
+    new_txt_name ="E:/JY_detection/xdsj_detection/data/dataset/train22_1111_serve.txt"
 
-    # change_txt(txt_path, new_txt_name, file_path, "serve")
-    target_path = "F:/model_data/XDSJ/20211126use"
+    # file_path = "/home/sunyihuan/sunyihuan_algorithm/data/robot_data/JPGImages"
+
+    # change_txt(txt_path, new_txt_name, file_path, "")
     # #
-    replace_txt_path(txt_path, new_txt_name, file_path, target_path)
+    replace_txt_path(txt_path, new_txt_name, "JPGImages_aug", "JPGImages")

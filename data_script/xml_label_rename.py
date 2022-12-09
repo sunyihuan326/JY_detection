@@ -56,13 +56,17 @@ def check_labelname(inputpath, label_name='Potatom'):
                 for sku in object1.findall('name'):
                     # if sku.text=="corn_others":
                     #     print(file)
-                    if sku.text != label_name:
+                    if sku.text == label_name:
                         print(file)
+                        print(sku.text)
+                        sku.text ="chairleg"
+                        print(sku.text)
+            tree.write(file, encoding='utf-8')
 
 
 if __name__ == '__main__':
-    inputpath = "F:/model_data/XDSJ/2020_data_bai/test/JoyRobot_1/Annotations_new"  # 这是xml文件的文件夹的绝对地址
-    changesku(inputpath, "roastedchicken")
+    inputpath = "F:/RobotProgram/data/chair_leg/annotations"  # 这是xml文件的文件夹的绝对地址
+    check_labelname(inputpath, "chair_leg")
     # cls_list = ["Pizzasix", "Pizzafour"]  # Pizza合并
     # cls_list = ["duck"]
     # for c in cls_list:

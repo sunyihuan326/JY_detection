@@ -114,9 +114,9 @@ if __name__ == '__main__':
     #
     # save_dir = "F:/robot_test_from_YangYalin/saved_pictures_1280_detetction1012"
 
-    img_dir = "F:/RobotProgram/data/other_camera/100_A03"  # 图片文件地址
+    img_dir = "F:/RobotProgram/data/dark_and_ledlight"  # 图片文件地址
 
-    save_dir = "F:/RobotProgram/data/other_camera/100_A03_detect"
+    save_dir = "F:/RobotProgram/data/dark_and_ledlight_detect"
 
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     Y = YoloPredict()

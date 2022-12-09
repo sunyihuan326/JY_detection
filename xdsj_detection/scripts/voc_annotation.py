@@ -107,9 +107,9 @@ def split_data(data_root, test_percent, val_percent):  # step2：将所有图片
     print("train size:", tr)
     print("test size:", te)
     print("val size:", val)
-    ftest = open(txtsavepath + '/test_20.txt', 'w')
-    ftrain = open(txtsavepath + '/train_20.txt', 'w')
-    fval = open(txtsavepath + '/val_20.txt', 'w')
+    ftest = open(txtsavepath + '/test_21.txt', 'w')
+    ftrain = open(txtsavepath + '/train_21.txt', 'w')
+    fval = open(txtsavepath + '/val_21.txt', 'w')
 
     for x in total_xml:
         if str(x).endswith("jpg"):
@@ -175,24 +175,24 @@ def convert_voc_annotation(data_path, data_type, anno_path, use_difficult_bbox=T
 
 
 if __name__ == '__main__':
-    data_root = "F:/model_data/XDSJ/20221025use"
+    data_root = "F:/model_data/XDSJ/20221111use"
 
     # step1:去除无框数据
-    img_dir = data_root + "/JPGImages"
-    xml_dir = data_root + "/Annotations"
-    cut_save_dir = data_root + "/use_cut"
-    if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
-    delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir)
-    delete_xml_jpg(img_dir, xml_dir, cut_save_dir)
-
-    # step2:分train、test
-    test_percent = 0.1
-    val_percent = 0
-    split_data(data_root, test_percent, val_percent)
+    # img_dir = data_root + "/JPGImages"
+    # xml_dir = data_root + "/Annotations"
+    # cut_save_dir = data_root + "/use_cut"
+    # if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
+    # delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir)
+    # delete_xml_jpg(img_dir, xml_dir, cut_save_dir)
+    #
+    # # step2:分train、test
+    # test_percent = 0.1
+    # val_percent = 0
+    # split_data(data_root, test_percent, val_percent)
 
     # step3：生成train.txt、test.txt
-    train_annotation = data_root + "/train20.txt"
-    test_annotation = data_root + "/test20.txt"
-    num1 = convert_voc_annotation(data_root, 'train_20', train_annotation, False)
-    num2 = convert_voc_annotation(data_root, 'test_20', test_annotation, False)
+    train_annotation = data_root + "/train21.txt"
+    test_annotation = data_root + "/test21.txt"
+    num1 = convert_voc_annotation(data_root, 'train_21', train_annotation, False)
+    num2 = convert_voc_annotation(data_root, 'test_21', test_annotation, False)
     print("train nums::{},test nums:::{}".format(num1, num2))
