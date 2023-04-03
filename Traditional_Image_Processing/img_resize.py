@@ -2,9 +2,15 @@
 # @Time    : 2020/6/11
 # @Author  : sunyihuan
 # @File    : img_resize.py
-from PIL import Image
-img_path="C:/Users/sunyihuan/Desktop/X5_test/611_test/sweetpotatocut/20200611113758.jpg"
-img = Image.open(img_path)
-img_new = img.resize((800, 600), Image.ANTIALIAS)  # 图片尺寸变化
+import os
 
-img_new.save("C:/Users/sunyihuan/Desktop/X5_test/611_test/sweetpotatocut/20200611113758_0.jpg")
+from PIL import Image
+
+img_dir = "F:/model_data/FOOD/2023/03/aug_data/samples"
+
+for im in os.listdir(img_dir):
+    img_path = img_dir + "/" + im
+    img = Image.open(img_path)
+    img_new = img.resize((1000, 1000), Image.ANTIALIAS)  # 图片尺寸变化
+    if img_new.mode == "RGBA": img_new = img_new.convert('RGB')
+    img_new.save(img_path)

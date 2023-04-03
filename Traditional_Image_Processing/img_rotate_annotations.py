@@ -47,10 +47,11 @@ def RotateBox(img_size, original_PointA, original_PointB, rota):
     :param rota: 旋转角度
     :return:
     '''
-    a = pointRotate(img_size, original_PointA, (800, 600), rota)
-    b = pointRotate(img_size, (original_PointB[0], original_PointA[1]), (800, 600), rota)
-    c = pointRotate(img_size, (original_PointA[0], original_PointB[1]), (800, 600), rota)
-    d = pointRotate(img_size, original_PointB, (800, 600), rota)
+    # (center_x,center_y)=(int(list(img_size)[0]/2),int(list(img_size)[1]/2))
+    a = pointRotate(img_size, original_PointA, (800,600), rota)
+    b = pointRotate(img_size, (original_PointB[0], original_PointA[1]), (800,600), rota)
+    c = pointRotate(img_size, (original_PointA[0], original_PointB[1]), (800,600), rota)
+    d = pointRotate(img_size, original_PointB, (800,600), rota)
     pt1_x = int((c[0] + a[0]) / 2)
     pt1_y = int((b[1] + a[1]) / 2)
     pt2_x = int((d[0] + b[0]) / 2)
@@ -66,7 +67,7 @@ def image_rotate(img_path, xml_path):
     '''
     img = Image.open(img_path)
     (w, h) = img.size
-    rota = random.randint(1, 3)
+    rota = random.randint(2, 45)
     img_new = img.rotate(rota, expand=1)  # 图片旋转
 
     # xml标注数据修改
@@ -115,10 +116,10 @@ def img_dir_aug(img_dir, xml_dir, img_save_dir, xml_save_dir):
 
 
 if __name__ == "__main__":
-    img_dir = "E:/DataSets/KX_FOODSets_model_data/X_KX_data_27_1111_train"
-    xml_dir = "E:/DataSets/KX_FOODSets_model_data/X_KX_data_27_1111/Annotations"
-    img_save_dir = "C:/Users/sunyihuan/Desktop/data/rotate10"
-    xml_save_dir = "C:/Users/sunyihuan/Desktop/data/rotate10_annotations"
+    img_dir = "F:/model_data/FOOD/2023/03/aug_data/JPGImages/chips_rotate"
+    xml_dir = "F:/model_data/FOOD/2023/03/aug_data/Annotations/chips_rotate"
+    img_save_dir = "F:/model_data/FOOD/2023/03/aug_data/JPGImages/chips_rotate0"
+    xml_save_dir = "F:/model_data/FOOD/2023/03/aug_data/Annotations/chips_rotate0"
 
     if not os.path.exists(img_save_dir): os.mkdir(img_save_dir)
     if not os.path.exists(xml_save_dir): os.mkdir(xml_save_dir)

@@ -94,22 +94,23 @@ def data_aug(img_dir, xml_dir, img_save_dir, xml_save_dir):
     for img_file in tqdm(os.listdir(img_dir)):
         if img_file.endswith("jpg"):
             img = img_dir + "/" + img_file
-            mode = "gaussian"
+            mode = "salt"
             # img = au.aug_filter(img, mode=mode)  # 滤波
-            img = au.aug_noise(img, mode=mode)  # 加入噪声
-            # img = au.aug_bright(img, 1.2)  # 亮度调整
-            # img = au.aug_contrast(img, 1.2)  #对比度增强
-            img_name = str(img_file).split(".")[0] + "_" + mode + ".jpg"  # 图片名称
+            # img = au.aug_noise(img, mode=mode)  # 加入噪声
+            # img = au.aug_bright(img, 1.4)  # 亮度调整
+            img = au.aug_contrast(img, 2)  #对比度增强
+            img_name = str(img_file).split(".")[0] + "_" + "contrast" + ".jpg"  # 图片名称
             plt.imsave(img_save_dir + "/" + img_name, img.astype(np.uint8))  # 保存图片
             xml_name = str(img_name).split(".")[0] + ".xml"  # xml文件名称
             shutil.copy(xml_dir + "/" + str(img_file).split(".")[0] + ".xml", xml_save_dir + "/" + xml_name)  # 拷贝xml数据
 
 
 if __name__ == "__main__":
-    img_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/train/JPGImages"
-    xml_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/train/Annotations"
-    img_save_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/gaussian"
-    xml_save_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/gaussian_annotations"
+    img_dir = "F:/model_data/FOOD/2023/03/JPGImages"
+    xml_dir = "F:/model_data/FOOD/2023/03/Annotations"
+    img_save_dir = "F:/model_data/FOOD/2023/03/aug_data/aug/JPGImages_resize"
+    xml_save_dir = "F:/model_data/FOOD/2023/03/aug_data/aug/JPGImages_resize_annotations"
+
     if not os.path.exists(img_save_dir): os.mkdir(img_save_dir)
     if not os.path.exists(xml_save_dir): os.mkdir(xml_save_dir)
     data_aug(img_dir, xml_dir, img_save_dir, xml_save_dir)

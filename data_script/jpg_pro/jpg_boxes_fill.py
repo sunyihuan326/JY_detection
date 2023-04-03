@@ -70,7 +70,7 @@ def dir_fill(image_dir, xml_dir, save_dir):
 
 # if __name__ == "__main__":
 #     image_dir = "F:/model_data/XDSJ/202107/JPGImages"
-#     save_dir = "F:/model_data/XDSJ/202107/JPGImages_aug"
-#     if not os.path.exists(save_dir): os.mkdir(save_dir)
-#     xml_dir = "F:/model_data/XDSJ/202107/Annotations"
-#     dir_fill(image_dir, xml_dir, save_dir)
+#     save_dir = "F:/model_data/XDSJ/202107/JPGImages_augave_dir): os.mkdir(save_dir)
+# #     xml_dir = "F:/model_data/XDSJ/202107/Annotations"
+# #     dir_fill(image_dir, xml_dir, save_dir)"
+#     if not os.path.exists(s

@@ -32,24 +32,23 @@ def delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir):
     print("图片总数：", len(img_name_list))
     print("未标注图片名称：")
     for i in img_name_list:
-        try:
-            if not i.endswith(".jpg"):
-                os.remove(img_dir + "/" + i)
-            if str(i.split(".jpg")[0] + ".xml") not in xml_name_list:
-                print(img_dir + "/" + i)
+        if not i.endswith(".jpg") and not i.endswith(".png"):
+            # print(img_dir + "/" + i)
+            os.remove(img_dir + "/" + i)
+        else:
+            if str(i.split(".")[0] + ".xml") not in xml_name_list:
                 shutil.move(img_dir + "/" + i, jpg_cut_save_dir + "/" + i)
-        except:
-            print(img_dir + "/" + i)
-
+    #
     # xml中有，jpg中没有的
     print("已标注总数：", len(xml_name_list))
     print("已标注，但图片已删除名称：")
     for i in xml_name_list:
-        # print(i)
         if not i.endswith(".xml"):
+            print(xml_dir + "/" + i)
             os.remove(xml_dir + "/" + i)
         else:
-            if str(i.split(".xml")[0] + ".jpg") not in img_name_list:
+            if str(i.split(".xml")[0] + ".jpg") not in img_name_list and str(
+                    i.split(".xml")[0] + ".png") not in img_name_list:
                 print(xml_dir + "/" + i)
                 shutil.move(xml_dir + "/" + i, xml_cut_save_dir + "/" + i)
         # try:
@@ -63,9 +62,9 @@ def delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir):
 
 
 if __name__ == "__main__":
-    img_dir = "F:/model_data/XDSJ/20220930use/JPGImages"
-    xml_dir = "F:/model_data/XDSJ/20220930use/JPGImages"
-    cut_save_dir = "F:/model_data/XDSJ/20220930use/JPGImages"
+    img_dir = "F:/model_data/XDSJ/20221230use/JPGImages"
+    xml_dir = "F:/model_data/XDSJ/20221230use/Annotations"
+    cut_save_dir = "F:/model_data/XDSJ/20221230use/cut"
     if not os.path.exists(cut_save_dir): os.mkdir(cut_save_dir)
     delete_xmljpg_diff(img_dir, xml_dir, cut_save_dir)
     # cls_list = ["beefsteak", "bread", "cartooncookies", "chestnut", "chickenwings",

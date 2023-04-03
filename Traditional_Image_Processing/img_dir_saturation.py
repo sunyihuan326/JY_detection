@@ -97,10 +97,12 @@ def data_aug(img_dir, xml_dir, img_save_dir, xml_save_dir):
 
 
 if __name__ == "__main__":
-    img_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/train/JPGImages"
-    xml_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/train/Annotations"
-    img_save_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/saturation3"
-    xml_save_dir = "C:/Users/sunyihuan/Desktop/peanuts_all/saturation3_annotations"
+    img_dir = "F:/model_data/FOOD/2023/03/aug_data/JPGImages/chips"
+    xml_dir = "F:/model_data/FOOD/2023/03/aug_data/Annotations/chips"
+    img_save_dir = "F:/model_data/FOOD/2023/03/aug_data/aug/chips_saturation3"
+    xml_save_dir = "F:/model_data/FOOD/2023/03/aug_data/aug/chips_saturation3_annotations"
+
     if not os.path.exists(img_save_dir): os.mkdir(img_save_dir)
     if not os.path.exists(xml_save_dir): os.mkdir(xml_save_dir)
+
     data_aug(img_dir, xml_dir, img_save_dir, xml_save_dir)

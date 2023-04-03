@@ -29,7 +29,25 @@ class copy_img(object):
         self.img_orginal_dir = img_orginal_dir
         self.img_copy_dir = img_copy_dir
 
-    def copy_imgs(self):
+    def copy_imgs(self, target_label):
+        for file in tqdm(os.listdir(self.xml_dir)):
+            if str(file).endswith("xml"):
+                xml_file = self.xml_dir + "/" + file
+                tree = ET.parse(xml_file)
+                root = tree.getroot()
+                for object1 in root.findall('object'):
+                    for sku in object1.findall('name'):
+                        label = sku.text
+                        if label == target_label:
+                            img_orginal_file = os.path.join(self.img_orginal_dir, file.split(".")[0] + ".jpg")
+                            img_copy_file = os.path.join(self.img_copy_dir, file.split(".")[0] + ".jpg")
+                            shutil.copy(img_orginal_file, img_copy_file)
+
+    def copy_all_classes(self):
+        '''
+        将所有类别，按类别分别拷入对应文件夹
+        :return:
+        '''
         for file in tqdm(os.listdir(self.xml_dir)):
             if str(file).endswith("xml"):
                 xml_file = self.xml_dir + "/" + file
@@ -49,10 +67,11 @@ class copy_img(object):
 
 
 if __name__ == "__main__":
-    xml_dir = "F:/model_data/XDSJ/2020_data_bai/Annotations"
-    img_orginal_dir = "F:/model_data/XDSJ/2020_data_bai/JPGImages"
-    img_copy_dir = "F:/model_data/XDSJ/2020_data_bai/JPGImages_classes"
+    xml_dir = "F:/model_data/XDSJ/all_data/20221115/Annotations"
+    img_orginal_dir = "F:/model_data/XDSJ/all_data/20221115/JPGImages"
+    target_label="patchboard"
+    img_copy_dir = "F:/model_data/XDSJ/all_data/20221115/JPGImages_{}".format(target_label)
     if not os.path.exists(img_copy_dir): os.mkdir(img_copy_dir)
 
     ci = copy_img(xml_dir, img_orginal_dir, img_copy_dir)
-    ci.copy_imgs()
+    ci.copy_imgs(target_label)
